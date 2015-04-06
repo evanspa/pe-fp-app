@@ -24,7 +24,7 @@ pe-fp-app also serves as the reference application for the
 
 ## About the Fuel Purchase System
 
-The fuel purchase system, in its present form, is not meant to be terribly useful.  It exists more as a reference implementation for a set of component libraries.  The fuel purchase system is a client/server one.  This repo, **pe-fp-app**, represents the server-side application of the fuel purchase system.  It exists as a REST API endpoint for client applications of the system.
+The fuel purchase system, in its present form, is not meant to be terribly useful.  It exists more as a reference implementation for a set of libraries.  The fuel purchase system is a client/server one.  This repo, *pe-fp-app*, represents the server-side application of the fuel purchase system.  It exists as a REST API endpoint for [client applications](#client-applications) of the system.  The libraries are generic, and thus are not coupled to the fuel purchase system.  The server-side application is built using the [pe-* Clojure library suite](#pe--clojure-library-suite).
 
 ### Client Applications
 
