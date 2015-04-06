@@ -24,6 +24,8 @@ pe-fp-app also serves as the reference application for the
 
 ## About the Fuel Purchase System
 
+The fuel purchase system, in its present form, is not meant to be terribly useful.  It exists more as a reference implementation for a set of component libraries.  The fuel purchase system is a client/server one.  This repo, **pe-fp-app**, represents the server-side application of the fuel purchase system.  It exists as a REST API endpoint for client applications of the system.
+
 ### Client Applications
 
 Currently there only exists an iOS client application for the fuel purchase
