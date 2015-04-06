@@ -1,0 +1,9 @@
+logs
+.lein-failures
+.lein-env
+checkouts
+pom.xml
+target
+pom.xml.asc
+doc
+.nrepl-port
