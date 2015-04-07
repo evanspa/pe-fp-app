@@ -31,7 +31,7 @@ as a REST API endpoint for [client applications](#client-applications) of the
 system.  The libraries are generic, and thus are not coupled to the fuel
 purchase system.
 
-pe-fp-app makes use of the [pe-* Clojure library suite](#pe--clojure-library-suite).
+pe-fp-app makes use of the [pe-* Clojure library suite](#pe--clojure-library-suite), as well as [pe-fp-rest](https://github.com/evanspa/pe-fp-rest) (*which uses [pe-fp-core](https://github.com/evanspa/pe-fp-core)*).
 
 ### Client Applications
 
