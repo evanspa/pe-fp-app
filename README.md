@@ -2,15 +2,13 @@
 
 [![Build Status](https://travis-ci.org/evanspa/pe-fp-app.svg)](https://travis-ci.org/evanspa/pe-fp-app)
 
-pe-fp-app is the REST API endpoint for the fuel purchase system.  The fuel
+pe-fp-app is the REST API endpoint for the [fuel purchase system](#about-the-fuel-purchase-system).  The fuel
 purchase system consists of 2 tiers:
 [client applications](#client-applications) and the server application.
 pe-fp-app represents the server application; it exposes a REST API endpoint to
 client applications.
 
-In addition to being the server application of the fuel purchase system,
-pe-fp-app also serves as the reference application for the
-[pe-* Clojure library suite](#pe--clojure-library-suite).
+pe-fp-app makes use of the [pe-* Clojure library suite](#pe--clojure-library-suite).  In addition to using the pe-* library suite, it leverages [pe-fp-rest](https://github.com/evanspa/pe-fp-rest), which implements the underlying fuel purchase-specific resources of the REST API.  pe-fp-rest is built on top of [pe-fp-core](https://github.com/evanspa/pe-fp-core), which implements the core logic, model and data access functionality of the REST application.  This is better illustrating in the [component layering](#component-layering) diagram below.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
