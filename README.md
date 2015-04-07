@@ -56,7 +56,7 @@ The following diagram attempts to illustrates the dependencies among the main
 components of the fuel purchase server application.
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/pe-fp-app-Dependency-Graph.png">
+src="https://github.com/evanspa/pe-fp-app/raw/master/drawings/pe-fp-app-Dependency-Graph.png">
 
 ## pe-* Clojure Library Suite
 The pe-* Clojure library suite is a set of Clojure libraries to aid in the
