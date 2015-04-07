@@ -2,12 +2,14 @@
 
 set -x
 
+readonly FPAPP_VERSION="$1"
+
 ################################################################################
 # Locations
 ################################################################################
 readonly FPAPP_HOME="$HOME/Documents/BitBucket-repos/pe-fp-app"
 readonly FPAPP_UBERJARS_DIR="$FPAPP_HOME/target"
-readonly FPAPP_UBERJAR_NAME="pe-fp-app-0.0.1-SNAPSHOT-standalone.jar"
+readonly FPAPP_UBERJAR_NAME="pe-fp-app-${FPAPP_VERSION}-standalone.jar"
 
 ################################################################################
 # Config variables

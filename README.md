@@ -17,19 +17,46 @@ pe-fp-app also serves as the reference application for the
 **Table of Contents**
 
 - [About the Fuel Purchase System](#about-the-fuel-purchase-system)
-  -[Client Applications](#client-applications)
+  - [Client Applications](#client-applications)
+- [Component Layering](#component-layering)
+- [Dependency Graph](#dependency-graph)
 - [pe-* Clojure Library Suite](#pe--clojure-library-suite)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## About the Fuel Purchase System
 
-The fuel purchase system, in its present form, is not meant to be terribly useful.  It exists more as a reference implementation for a set of libraries.  The fuel purchase system is a client/server one.  This repo, *pe-fp-app*, represents the server-side application of the fuel purchase system.  It exists as a REST API endpoint for [client applications](#client-applications) of the system.  The libraries are generic, and thus are not coupled to the fuel purchase system.  The server-side application is built using the [pe-* Clojure library suite](#pe--clojure-library-suite).
+The fuel purchase system, in its present form, is not meant to be terribly
+useful.  It exists more as a reference implementation for a set of libraries.
+The fuel purchase system is a client/server one.  This repo, *pe-fp-app*,
+represents the server-side application of the fuel purchase system.  It exists
+as a REST API endpoint for [client applications](#client-applications) of the
+system.  The libraries are generic, and thus are not coupled to the fuel
+purchase system.  The server-side application is built using the
+[pe-* Clojure library suite](#pe--clojure-library-suite).
 
 ### Client Applications
 
 Currently there only exists an iOS client application for the fuel purchase
 system: [PEFuelPurchase-App](https://github.com/evanspa/PEFuelPurchase-App).
+
+## Component Layering
+
+The following diagram attempts to illustrate the layered architecture of the
+fuel purchase server application.  The various *core* and *rest* libraries
+encapsulates the bulk of the application; the core logic, model and data access
+functionality.
+
+<img
+src="https://github.com/evanspa/pe-fp-app/raw/master/drawings/pe-fp-app-Component-Layers.png">
+
+## Dependency Graph
+
+The following diagram attempts to illustrates the dependencies among the main
+components of the fuel purchase server application.
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/pe-fp-app-Dependency-Graph.png">
 
 ## pe-* Clojure Library Suite
 The pe-* Clojure library suite is a set of Clojure libraries to aid in the
