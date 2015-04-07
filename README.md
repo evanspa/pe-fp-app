@@ -8,7 +8,7 @@ purchase system consists of 2 tiers:
 pe-fp-app represents the server application; it exposes a REST API endpoint to
 client applications.
 
-pe-fp-app makes use of the [pe-* Clojure library suite](#pe--clojure-library-suite).  In addition to using the pe-* library suite, it leverages [pe-fp-rest](https://github.com/evanspa/pe-fp-rest), which implements the underlying fuel purchase-specific resources of the REST API.  pe-fp-rest is built on top of [pe-fp-core](https://github.com/evanspa/pe-fp-core), which implements the core logic, model and data access functionality of the REST application.  This is better illustrating in the [component layering](#component-layering) diagram below.
+pe-fp-app makes use of the [pe-* Clojure library suite](#pe--clojure-library-suite).  In addition to using the pe-* library suite, it leverages [pe-fp-rest](https://github.com/evanspa/pe-fp-rest), which implements the underlying fuel purchase-specific resources of the REST API.  pe-fp-rest is built on top of [pe-fp-core](https://github.com/evanspa/pe-fp-core), which implements the core logic, model and data access functionality of the REST application.  These tiers are illustrated in the [component layering](#component-layering) diagram below.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
