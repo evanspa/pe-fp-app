@@ -13,7 +13,7 @@
                  [clj-time "0.8.0"]
                  [org.clojure/tools.nrepl "0.2.7"]
                  [org.clojure/data.json "0.2.5"]
-                 [com.datomic/datomic-free "0.9.5130" ; change to '-pro' when doing prod build
+                 [com.datomic/datomic-pro "0.9.5130" ; change to '-pro' when doing prod build
                   :exclusions [org.slf4j/slf4j-nop
                                joda-time
                                org.slf4j/slf4j-log4j12]]
@@ -25,14 +25,15 @@
                  [pe-core-utils "0.0.8"]
                  [pe-apptxn-restsupport "0.0.4"]
                  [pe-rest-utils "0.0.3"]
-                 [pe-user-rest "0.0.2"]
+                 [pe-user-rest "0.0.3"]
                  [pe-fp-rest "0.0.1"]]
   :resource-paths ["resources"]
   :ring {:handler pe-fp-app.core/fp-app
          :init pe-fp-app.lifecycle/init
          :destroy pe-fp-app.lifecycle/stop}
   :profiles {:dev {:source-paths ["dev"]  ;ensures 'user.clj' gets auto-loaded
-                   :env {:fp-datomic-url "datomic:mem://fp"
+                   :env {;:fp-datomic-url "datomic:mem://fp"
+                         :fp-datomic-url "datomic:sql://fp?jdbc:postgresql://localhost:5432/datomic?user=datomic&password=datomic"
                          :fp-base-url "http://localhost:4040"
                          :fp-nrepl-server-port 7888}
                    :plugins [[cider/cider-nrepl "0.9.0-SNAPSHOT"]
