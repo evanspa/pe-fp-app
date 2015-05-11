@@ -1,10 +1,12 @@
 (ns pe-fp-app.core
   (:require [clojure.data.json :as json]
+            [liberator.dev :refer [wrap-trace]]
             [clojure.tools.logging :as log]
             [clojure.pprint :refer (pprint)]
             [datomic.api :refer [q db] :as d]
             [compojure.core :refer [defroutes ANY]]
             [ring.middleware.cookies :refer [wrap-cookies]]
+            [ring.middleware.params :refer [wrap-params]]
             [compojure.handler :as handler]
             [pe-fp-app.config :as config]
             [pe-fp-app.apptxn :as fpapptxn]
@@ -59,11 +61,11 @@
           config/fp-entity-uri-prefix
           usermeta/pathcomp-login))
 
-(def changelog-since-uri-template
+(def changelog-uri-template
   (format "%s%s/:user-entid/%s"
           config/fp-entity-uri-prefix
           usermeta/pathcomp-users
-          clmeta/pathcomp-changelog-since))
+          clmeta/pathcomp-changelog))
 
 (def apptxnset-uri-template
   (format "%s%s/:user-entid/%s"
@@ -152,9 +154,9 @@
         (rucore/assoc-link (link-fn fpmeta/fp-fplogs-relation
                                     fpmeta/mt-subtype-fplog
                                     fpmeta/pathcomp-fuelpurchase-logs))
-        (rucore/assoc-link (link-fn clmeta/changelog-since-relation
-                                    clmeta/mt-subtype-changelog-since
-                                    clmeta/pathcomp-changelog-since))
+        (rucore/assoc-link (link-fn clmeta/changelog-relation
+                                    clmeta/mt-subtype-changelog
+                                    clmeta/pathcomp-changelog))
         (rucore/assoc-link (link-fn apptxnmeta/apptxnset-relation
                                     apptxnmeta/mt-subtype-apptxnset
                                     apptxnmeta/pathcomp-apptxnset)))))
@@ -182,15 +184,15 @@
    entity
    version
    format-ind]
-  (let [subent-txn-time (ducore/txn-time conn sub-entid sub-ent-attr)
-        subent-txn-time-str (ucore/instant->rfc7231str subent-txn-time)]
+  (let [subent-txn-time (ducore/txn-time conn sub-entid)]
     {:media-type (rucore/media-type rumeta/mt-type
                                     (mt-subtype-fn config/fp-mt-subtype-prefix)
                                     version
                                     format-ind)
      :location (make-user-subentity-url user-entid pathcomp-subent sub-entid)
-     :last-modified subent-txn-time-str
-     :payload (payload-transform-fn entity)}))
+     :payload (-> entity
+                  (assoc :last-modified (.getTime subent-txn-time))
+                  (payload-transform-fn))}))
 
 (defn embedded-vehicle
   [user-entid
@@ -380,7 +382,7 @@
                                                                     (Long. user-entid)
                                                                     config/fp-auth-scheme
                                                                     config/fp-auth-scheme-param-name))))
-  (ANY changelog-since-uri-template
+  (ANY changelog-uri-template
        [user-entid]
        (letfn [(mt-fn-maker [mt-subtype-fn]
                  (fn [version accept-format-ind]
@@ -392,60 +394,65 @@
                  (fn [entid]
                    (make-user-subentity-url user-entid pathcomp entid)))]
          (let [user-entid-l (Long. user-entid)]
-           (clres/changelog-since-res @config/conn
-                                      config/fp-apptxn-partition
-                                      config/fp-mt-subtype-prefix
-                                      config/fphdr-auth-token
-                                      config/fphdr-error-mask
-                                      config/fp-base-url
-                                      config/fp-entity-uri-prefix
-                                      config/fphdr-apptxn-id
-                                      config/fphdr-useragent-device-make
-                                      config/fphdr-useragent-device-os
-                                      config/fphdr-useragent-device-os-version
-                                      (fn [ctx] (userresutils/authorized? ctx
-                                                                          @config/conn
-                                                                          user-entid-l
-                                                                          config/fp-auth-scheme
-                                                                          config/fp-auth-scheme-param-name))
-                                      user-entid-l
-                                      [[user-entid-l
-                                        (mt-fn-maker fpmeta/mt-subtype-vehicle)
-                                        (loc-fn-maker fpmeta/pathcomp-vehicles)
-                                        user-links-fn
-                                        [:user/auth-token
-                                         :user/hashed-password
-                                         :user/password]]
-                                       [:fpvehicle/user
-                                        user-entid-l
-                                        (mt-fn-maker fpmeta/mt-subtype-vehicle)
-                                        (loc-fn-maker fpmeta/pathcomp-vehicles)
-                                        nil
-                                        [:fpvehicle/user]]
-                                       [:fpfuelstation/user
-                                        user-entid-l
-                                        (mt-fn-maker fpmeta/mt-subtype-fuelstation)
-                                        (loc-fn-maker fpmeta/pathcomp-fuelstations)
-                                        nil
-                                        [:fpfuelstation/user]]
-                                       [:fplog/user
-                                        user-entid-l
-                                        (mt-fn-maker fpmeta/mt-subtype-fplog)
-                                        (loc-fn-maker fpmeta/pathcomp-fuelpurchase-logs)
-                                        nil
-                                        [:fplog/user]]
-                                       [:envlog/user
-                                        user-entid-l
-                                        (mt-fn-maker fpmeta/mt-subtype-envlog)
-                                        (loc-fn-maker fpmeta/pathcomp-environment-logs)
-                                        nil
-                                        [:envlog/user]]]
-                                      fpapptxn/fpapptxn-changelog-since-fetch
-                                      fpapptxn/fpapptxnlog-fetchclsince-remote-proc-started
-                                      fpapptxn/fpapptxnlog-fetchclsince-remote-proc-done-success
-                                      fpapptxn/fpapptxnlog-fetchclsince-remote-proc-done-err-occurred
-                                      apptxnres/apptxn-async-logger
-                                      apptxnres/make-apptxn))))
+           (clres/changelog-res @config/conn
+                                config/fp-apptxn-partition
+                                config/fp-mt-subtype-prefix
+                                config/fphdr-auth-token
+                                config/fphdr-error-mask
+                                config/fp-base-url
+                                config/fp-entity-uri-prefix
+                                config/fphdr-apptxn-id
+                                config/fphdr-useragent-device-make
+                                config/fphdr-useragent-device-os
+                                config/fphdr-useragent-device-os-version
+                                (fn [ctx] (userresutils/authorized? ctx
+                                                                    @config/conn
+                                                                    user-entid-l
+                                                                    config/fp-auth-scheme
+                                                                    config/fp-auth-scheme-param-name))
+                                user-entid-l
+                                [[user-entid-l
+                                  :user/hashed-password
+                                  (mt-fn-maker usermeta/mt-subtype-user)
+                                  (fn [user-entid] (rucore/make-abs-link-href config/fp-base-url
+                                                                              (str config/fp-entity-uri-prefix
+                                                                                   usermeta/pathcomp-users
+                                                                                   "/"
+                                                                                   user-entid)))
+                                  user-links-fn
+                                  [:user/auth-token
+                                   :user/hashed-password
+                                   :user/password]]
+                                 [:fpvehicle/user
+                                  user-entid-l
+                                  (mt-fn-maker fpmeta/mt-subtype-vehicle)
+                                  (loc-fn-maker fpmeta/pathcomp-vehicles)
+                                  nil
+                                  [:fpvehicle/user]]
+                                 [:fpfuelstation/user
+                                  user-entid-l
+                                  (mt-fn-maker fpmeta/mt-subtype-fuelstation)
+                                  (loc-fn-maker fpmeta/pathcomp-fuelstations)
+                                  nil
+                                  [:fpfuelstation/user]]
+                                 [:fpfuelpurchaselog/user
+                                  user-entid-l
+                                  (mt-fn-maker fpmeta/mt-subtype-fplog)
+                                  (loc-fn-maker fpmeta/pathcomp-fuelpurchase-logs)
+                                  nil
+                                  [:fpfuelpurchaselog/user]]
+                                 [:fpenvironmentlog/user
+                                  user-entid-l
+                                  (mt-fn-maker fpmeta/mt-subtype-envlog)
+                                  (loc-fn-maker fpmeta/pathcomp-environment-logs)
+                                  nil
+                                  [:fpenvironmentlog/user]]]
+                                fpapptxn/fpapptxn-changelog-fetch
+                                fpapptxn/fpapptxnlog-fetchclsince-remote-proc-started
+                                fpapptxn/fpapptxnlog-fetchclsince-remote-proc-done-success
+                                fpapptxn/fpapptxnlog-fetchclsince-remote-proc-done-err-occurred
+                                apptxnres/apptxn-async-logger
+                                apptxnres/make-apptxn))))
   (ANY vehicles-uri-template
        [user-entid]
        (vehsres/vehicles-res @config/conn
@@ -609,4 +616,6 @@
 (def fp-app
   (-> fp-routes
       (handler/api)
+      (wrap-trace :header)
+      (wrap-params)
       (wrap-cookies)))

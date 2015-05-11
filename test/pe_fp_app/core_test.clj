@@ -4,6 +4,7 @@
             [clojure.tools.logging :as log]
             [clojure.pprint :refer (pprint)]
             [clj-time.core :as t]
+            [clj-time.coerce :as tc]
             [datomic.api :refer [q db] :as d]
             [pe-fp-core.core :as fpcore]
             [pe-user-core.core :as usercore]
@@ -90,8 +91,6 @@
       (let [hdrs (:headers resp)
             resp-body-stream (:body resp)
             user-location-str (get hdrs "location")
-            user-last-modified-str (get hdrs "last-modified")
-            last-modified (ucore/rfc7231str->instant user-last-modified-str)
             resp-user-entid-str (rtucore/last-url-part user-location-str)
             pct (rucore/parse-media-type (get hdrs "Content-Type"))
             charset (get rumeta/char-sets (:charset pct))
@@ -140,18 +139,14 @@
           (testing "headers and body of created 300Z vehicle"
             (let [hdrs (:headers resp)
                   resp-body-stream (:body resp)
-                  veh-location-str (get hdrs "location")
-                  veh-last-modified-str (get hdrs "last-modified")]
+                  veh-location-str (get hdrs "location")]
               (is (= "Accept, Accept-Charset, Accept-Language" (get hdrs "Vary")))
               (is (not (nil? resp-body-stream)))
               (is (not (nil? veh-location-str)))
-              (is (not (nil? veh-last-modified-str)))
-              (let [last-modified (ucore/rfc7231str->instant veh-last-modified-str)
-                    resp-veh-entid-str (rtucore/last-url-part veh-location-str)
+              (let [resp-veh-entid-str (rtucore/last-url-part veh-location-str)
                     pct (rucore/parse-media-type (get hdrs "Content-Type"))
                     charset (get rumeta/char-sets (:charset pct))
                     resp-veh (rucore/read-res pct resp-body-stream charset)]
-                (is (not (nil? last-modified)))
                 (is (not (nil? resp-veh-entid-str)))
                 (is (not (nil? resp-veh)))
                 (is (= "300Z" (get resp-veh "fpvehicle/name")))
@@ -202,18 +197,14 @@
                       (testing "headers and body of created mazda vehicle"
                         (let [hdrs (:headers resp)
                               resp-body-stream (:body resp)
-                              veh-location-str (get hdrs "location")
-                              veh-last-modified-str (get hdrs "last-modified")]
+                              veh-location-str (get hdrs "location")]
                           (is (= "Accept, Accept-Charset, Accept-Language" (get hdrs "Vary")))
                           (is (not (nil? resp-body-stream)))
                           (is (not (nil? veh-location-str)))
-                          (is (not (nil? veh-last-modified-str)))
-                          (let [last-modified (ucore/rfc7231str->instant veh-last-modified-str)
-                                resp-veh-entid-str (rtucore/last-url-part veh-location-str)
+                          (let [resp-veh-entid-str (rtucore/last-url-part veh-location-str)
                                 pct (rucore/parse-media-type (get hdrs "Content-Type"))
                                 charset (get rumeta/char-sets (:charset pct))
                                 resp-veh (rucore/read-res pct resp-body-stream charset)]
-                            (is (not (nil? last-modified)))
                             (is (not (nil? resp-veh-entid-str)))
                             (is (not (nil? resp-veh)))
                             (is (= "Mazda CX-9" (get resp-veh "fpvehicle/name")))
@@ -263,8 +254,6 @@
       (let [hdrs (:headers resp)
             resp-body-stream (:body resp)
             user-location-str (get hdrs "location")
-            user-last-modified-str (get hdrs "last-modified")
-            last-modified (ucore/rfc7231str->instant user-last-modified-str)
             resp-user-entid-str (rtucore/last-url-part user-location-str)
             pct (rucore/parse-media-type (get hdrs "Content-Type"))
             charset (get rumeta/char-sets (:charset pct))
@@ -313,18 +302,14 @@
           (testing "headers and body of created 300Z vehicle"
             (let [hdrs (:headers resp)
                   resp-body-stream (:body resp)
-                  veh-location-str (get hdrs "location")
-                  veh-last-modified-str (get hdrs "last-modified")]
+                  veh-location-str (get hdrs "location")]
               (is (= "Accept, Accept-Charset, Accept-Language" (get hdrs "Vary")))
               (is (not (nil? resp-body-stream)))
               (is (not (nil? veh-location-str)))
-              (is (not (nil? veh-last-modified-str)))
-              (let [last-modified (ucore/rfc7231str->instant veh-last-modified-str)
-                    resp-veh-entid-str (rtucore/last-url-part veh-location-str)
+              (let [resp-veh-entid-str (rtucore/last-url-part veh-location-str)
                     pct (rucore/parse-media-type (get hdrs "Content-Type"))
                     charset (get rumeta/char-sets (:charset pct))
                     resp-veh (rucore/read-res pct resp-body-stream charset)]
-                (is (not (nil? last-modified)))
                 (is (not (nil? resp-veh-entid-str)))
                 (is (not (nil? resp-veh)))
                 (is (= "300Z" (get resp-veh "fpvehicle/name")))
@@ -377,18 +362,14 @@
                       (testing "headers and body of created mazda vehicle"
                         (let [hdrs (:headers resp)
                               resp-body-stream (:body resp)
-                              veh-location-str (get hdrs "location")
-                              veh-last-modified-str (get hdrs "last-modified")]
+                              veh-location-str (get hdrs "location")]
                           (is (= "Accept, Accept-Charset, Accept-Language" (get hdrs "Vary")))
                           (is (not (nil? resp-body-stream)))
                           (is (not (nil? veh-location-str)))
-                          (is (not (nil? veh-last-modified-str)))
-                          (let [last-modified (ucore/rfc7231str->instant veh-last-modified-str)
-                                resp-veh-entid-str (rtucore/last-url-part veh-location-str)
+                          (let [resp-veh-entid-str (rtucore/last-url-part veh-location-str)
                                 pct (rucore/parse-media-type (get hdrs "Content-Type"))
                                 charset (get rumeta/char-sets (:charset pct))
                                 resp-veh (rucore/read-res pct resp-body-stream charset)]
-                            (is (not (nil? last-modified)))
                             (is (not (nil? resp-veh-entid-str)))
                             (is (not (nil? resp-veh)))
                             (is (= "Mazda CX-9" (get resp-veh "fpvehicle/name")))
@@ -435,8 +416,6 @@
       (let [hdrs (:headers resp)
             resp-body-stream (:body resp)
             user-location-str (get hdrs "location")
-            user-last-modified-str (get hdrs "last-modified")
-            last-modified (ucore/rfc7231str->instant user-last-modified-str)
             resp-user-entid-str (rtucore/last-url-part user-location-str)
             pct (rucore/parse-media-type (get hdrs "Content-Type"))
             charset (get rumeta/char-sets (:charset pct))
@@ -484,18 +463,14 @@
           (testing "headers and body of created 300Z vehicle"
             (let [hdrs (:headers resp)
                   resp-body-stream (:body resp)
-                  veh-location-str (get hdrs "location")
-                  veh-last-modified-str (get hdrs "last-modified")]
+                  veh-location-str (get hdrs "location")]
               (is (= "Accept, Accept-Charset, Accept-Language" (get hdrs "Vary")))
               (is (not (nil? resp-body-stream)))
               (is (not (nil? veh-location-str)))
-              (is (not (nil? veh-last-modified-str)))
-              (let [last-modified (ucore/rfc7231str->instant veh-last-modified-str)
-                    resp-veh-entid-str (rtucore/last-url-part veh-location-str)
+              (let [resp-veh-entid-str (rtucore/last-url-part veh-location-str)
                     pct (rucore/parse-media-type (get hdrs "Content-Type"))
                     charset (get rumeta/char-sets (:charset pct))
                     resp-veh (rucore/read-res pct resp-body-stream charset)]
-                (is (not (nil? last-modified)))
                 (is (not (nil? resp-veh-entid-str)))
                 (is (not (nil? resp-veh)))
                 (is (= "300Z" (get resp-veh "fpvehicle/name")))
@@ -546,18 +521,14 @@
                       (testing "headers and body of created mazda vehicle"
                         (let [hdrs (:headers resp)
                               resp-body-stream (:body resp)
-                              veh-location-str (get hdrs "location")
-                              veh-last-modified-str (get hdrs "last-modified")]
+                              veh-location-str (get hdrs "location")]
                           (is (= "Accept, Accept-Charset, Accept-Language" (get hdrs "Vary")))
                           (is (not (nil? resp-body-stream)))
                           (is (not (nil? veh-location-str)))
-                          (is (not (nil? veh-last-modified-str)))
-                          (let [last-modified (ucore/rfc7231str->instant veh-last-modified-str)
-                                resp-veh-entid-str (rtucore/last-url-part veh-location-str)
+                          (let [resp-veh-entid-str (rtucore/last-url-part veh-location-str)
                                 pct (rucore/parse-media-type (get hdrs "Content-Type"))
                                 charset (get rumeta/char-sets (:charset pct))
                                 resp-veh (rucore/read-res pct resp-body-stream charset)]
-                            (is (not (nil? last-modified)))
                             (is (not (nil? resp-veh-entid-str)))
                             (is (not (nil? resp-veh)))
                             (is (= "Mazda CX-9" (get resp-veh "fpvehicle/name")))
@@ -573,7 +544,7 @@
                                 (is (= 24.5 (:fpvehicle/fuel-capacity loaded-veh-mazda)))
                                 (is (= 87 (:fpvehicle/min-reqd-octane loaded-veh-mazda)))))))))))))))))))
 
-(deftest integration-test-4
+#_(deftest integration-test-4
   (testing "Change Log test 1"
     (is (nil? (usercore/load-user-by-email @config/conn "smithka@testing.com")))
     (is (nil? (usercore/load-user-by-username @config/conn "smithk")))
@@ -604,40 +575,41 @@
                                                           "UTF-8")))
           resp (core/fp-app req)]
       (testing "status code" (is (= 200 (:status resp))))
+      (log/debug "resp from creating user: " resp)
       (let [hdrs (:headers resp)
             resp-body-stream (:body resp)
             user-location-str (get hdrs "location")
-            user-last-modified-str (get hdrs "last-modified")
-            last-modified (ucore/rfc7231str->instant user-last-modified-str)
             resp-user-entid-str (rtucore/last-url-part user-location-str)
             pct (rucore/parse-media-type (get hdrs "Content-Type"))
             charset (get rumeta/char-sets (:charset pct))
             resp-user (rucore/read-res pct resp-body-stream charset)
+            user-last-modified-t0-str (get resp-user "last-modified")
             auth-token (get hdrs config/fphdr-auth-token)
             [loaded-user-entid loaded-user-ent] (usercore/load-user-by-authtoken @config/conn
                                                                                  (Long. resp-user-entid-str)
                                                                                  auth-token)]
         (is (not (nil? loaded-user-ent)))
-        (let [cl-uri (str config/fp-base-url
+        (is (not (nil? user-last-modified-t0-str)))
+        (let [user-last-modified-t0 (Long. user-last-modified-t0-str)
+              cl-uri (str config/fp-base-url
                           config/fp-entity-uri-prefix
                           usermeta/pathcomp-users
                           "/"
                           resp-user-entid-str
                           "/"
-                          clmeta/pathcomp-changelog-since)
+                          clmeta/pathcomp-changelog)
               req (-> (rtucore/req-w-std-hdrs rumeta/mt-type
-                                              (clmeta/mt-subtype-changelog-since config/fp-mt-subtype-prefix)
-                                              fpmeta/v001
+                                              (clmeta/mt-subtype-changelog config/fp-mt-subtype-prefix)
+                                              clmeta/v001
                                               "UTF-8;q=1,ISO-8859-1;q=0"
                                               "json"
                                               "en-US"
                                               :get
-                                              cl-uri
+                                              (str cl-uri "?" clmeta/since-query-param "=" user-last-modified-t0-str)
                                               config/fphdr-apptxn-id
                                               config/fphdr-useragent-device-make
                                               config/fphdr-useragent-device-os
                                               config/fphdr-useragent-device-os-version)
-                      (rtucore/header "If-Modified-Since" user-last-modified-str)
                       (rtucore/header "Authorization" (rtucore/authorization-req-hdr-val config/fp-auth-scheme
                                                                                          config/fp-auth-scheme-param-name
                                                                                          auth-token)))
@@ -645,15 +617,11 @@
           (testing "status code" (is (= 200 (:status resp))))
           (testing "headers and body of fetched change log"
             (let [hdrs (:headers resp)
-                  resp-body-stream (:body resp)
-                  cl-last-modified-str (get hdrs "last-modified")]
+                  resp-body-stream (:body resp)]
               (is (= "Accept, Accept-Charset, Accept-Language" (get hdrs "Vary")))
               (is (not (nil? resp-body-stream)))
-              (is (not (nil? cl-last-modified-str)))
-              (let [last-modified (ucore/rfc7231str->instant cl-last-modified-str)
-                    pct (rucore/parse-media-type (get hdrs "Content-Type"))
+              (let [pct (rucore/parse-media-type (get hdrs "Content-Type"))
                     charset (get rumeta/char-sets (:charset pct))
                     resp-cl (rucore/read-res pct resp-body-stream charset)]
                 (log/debug "resp-cl: " resp-cl)
-                (is (not (nil? last-modified)))
                 (is (not (nil? resp-cl)))))))))))
