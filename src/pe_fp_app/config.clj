@@ -4,31 +4,35 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Environment-controlled configuration values
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(def fp-datomic-url (env :fp-datomic-url))
-
 (def fp-base-url (env :fp-base-url))
-
 (def fp-nrepl-server-port (env :fp-nrepl-server-port))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Datomic-related configuration values
+;; Environment-controlled database config
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(def fp-app-schema-sets
-  [
-   ["apptxn-logging-schema-updates-0.0.1.dtm" ; initial release of application schema set
-    "user-schema-updates-0.0.1.dtm"
-    "fp-schema-updates-0.0.1.dtm"]
-   ])
+(def fp-db-name           (env :fp-db-name))
+(def fp-db-server-host    (env :fp-db-server-host))
+(def fp-db-server-port    (env :fp-db-server-port))
+(def fp-db-username       (env :fp-db-username))
+(def fp-db-password       (env :fp-db-password))
+(def fp-jdbc-driver-class (env :fp-db-driver-class))
+(def fp-jdbc-subprotocol  (env :fp-jdbc-subprotocol))
 
-(def fp-partition :fp)
+(defn db-spec-fn
+  ([]
+   (db-spec-fn nil))
+  ([db-name]
+   (let [subname-prefix (format "//%s:%s/" fp-db-server-host fp-db-server-port)]
+     {:classname fp-jdbc-driver-class
+      :subprotocol fp-jdbc-subprotocol
+      :subname (if db-name
+                 (str subname-prefix db-name)
+                 subname-prefix)
+      :user fp-db-username
+      :password fp-db-password})))
 
-(def fp-apptxn-partition :fp-apptxn)
-
-(def fp-app-schemaset-version-attr :fp-app-schemaset-version)
-
-(def conn
-  "Datomic connection object."
-  (atom nil))
+(def db-spec-without-db (db-spec-fn nil))
+(def db-spec (db-spec-fn fp-db-name))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; HTTP-related configuration values
@@ -43,7 +47,6 @@
 ;; 'Authorization' header parts
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def fp-auth-scheme "fp-auth")
-
 (def fp-auth-scheme-param-name "fp-token")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -55,15 +58,5 @@
 ;; Headers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def fphdr-establish-session "fp-establish-session")
-
 (def fphdr-auth-token "fp-auth-token")
-
 (def fphdr-error-mask "fp-error-mask")
-
-(def fphdr-apptxn-id "fp-apptxn-id")
-
-(def fphdr-useragent-device-make "fp-useragent-device-make")
-
-(def fphdr-useragent-device-os "fp-useragent-device-os")
-
-(def fphdr-useragent-device-os-version "fp-useragent-device-os-version")

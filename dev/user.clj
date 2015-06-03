@@ -6,15 +6,14 @@
             [clojure.stacktrace :refer (e)]
             [clj-time.core :as t]
             [clojure.test :as test]
-            [datomic.api :as d]
             [clojure.java.io :refer [resource]]
             [ring.server.standalone :refer (serve)]
-            [pe-datomic-utils.core :as ducore]
             [pe-fp-app.config :as config]
             [pe-fp-app.lifecycle :as lifecycle]
             [pe-fp-app.core :as core]
             [clojure.tools.logging :as log]
             [environ.core :refer [env]]
+            [pe-jdbc-utils.core :as jcore]
             [clojure.tools.namespace.repl :refer (refresh refresh-all)]))
 
 (def server (atom nil))
@@ -33,7 +32,7 @@
 
 (defn- go-with-db-refresh []
   (println "Proceeding to refresh the database")
-  (d/delete-database config/fp-datomic-url)
+  (jcore/drop-database config/db-spec-without-db config/fp-db-name)
   (lifecycle/init-database)
   (reset! server (create-and-start-server))
   (println "Jetty server restarted."))

@@ -13,27 +13,29 @@
                  [clj-time "0.8.0"]
                  [org.clojure/tools.nrepl "0.2.7"]
                  [org.clojure/data.json "0.2.5"]
-                 [com.datomic/datomic-free "0.9.5130" ; change to '-pro' when doing prod build
-                  :exclusions [org.slf4j/slf4j-nop
-                               joda-time
-                               org.slf4j/slf4j-log4j12]]
+                 [org.clojure/java.jdbc "0.3.6"]
                  [org.postgresql/postgresql "9.3-1102-jdbc41"]
                  [ring-server "0.3.1"]
                  [compojure "1.2.1"]
                  [liberator "0.12.2"]
                  [environ "1.0.0"]
-                 [pe-core-utils "0.0.9"]
-                 [pe-apptxn-restsupport "0.0.7"]
-                 [pe-rest-utils "0.0.5"]
-                 [pe-user-rest "0.0.6"]
-                 [pe-fp-rest "0.0.3"]]
+                 [pe-jdbc-utils "0.0.3"]
+                 [pe-core-utils "0.0.11"]
+                 [pe-rest-utils "0.0.9"]
+                 [pe-user-core "0.1.10"]
+                 [pe-user-rest "0.0.15"]
+                 [pe-fp-rest "0.0.6"]]
   :resource-paths ["resources"]
   :ring {:handler pe-fp-app.core/fp-app
          :init pe-fp-app.lifecycle/init
          :destroy pe-fp-app.lifecycle/stop}
   :profiles {:dev {:source-paths ["dev"]  ;ensures 'user.clj' gets auto-loaded
-                   :env {;:fp-datomic-url "datomic:mem://fp"
-                         :fp-datomic-url "datomic:sql://fp?jdbc:postgresql://localhost:5432/datomic?user=datomic&password=datomic"
+                   :env {:fp-db-name "fp"
+                         :fp-db-server-host "localhost"
+                         :fp-db-server-port 5432
+                         :fp-db-username "postgres"
+                         :fp-jdbc-driver-class "org.postgresql.Driver"
+                         :fp-jdbc-subprotocol "postgresql"
                          :fp-base-url "http://localhost:4040"
                          :fp-nrepl-server-port 7888}
                    :plugins [[cider/cider-nrepl "0.9.0-SNAPSHOT"]
@@ -43,9 +45,7 @@
                    :dependencies [[org.clojure/tools.namespace "0.2.7"]
                                   [org.clojure/java.classpath "0.2.2"]
                                   [org.clojure/tools.nrepl "0.2.7"]
-                                  [pe-datomic-testutils "0.0.2"]
-                                  [pe-rest-testutils "0.0.2"]
-                                  [pe-user-testutils "0.0.3"]
+                                  [pe-rest-testutils "0.0.5"]
                                   [ring-mock "0.1.5"]]}}
   :jvm-opts ["-Xmx1g" "-DFPAPP_LOGS_DIR=logs"]
   :repositories [["releases" {:url "https://clojars.org/repo"

@@ -2,19 +2,11 @@
   (:require [clojure.data.json :as json]
             [liberator.dev :refer [wrap-trace]]
             [clojure.tools.logging :as log]
-            [clojure.pprint :refer (pprint)]
-            [datomic.api :refer [q db] :as d]
             [compojure.core :refer [defroutes ANY]]
             [ring.middleware.cookies :refer [wrap-cookies]]
             [ring.middleware.params :refer [wrap-params]]
             [compojure.handler :as handler]
             [pe-fp-app.config :as config]
-            [pe-fp-app.apptxn :as fpapptxn]
-            [pe-datomic-utils.core :as ducore]
-            [pe-apptxn-core.core :as apptxncore]
-            [pe-apptxn-restsupport.resource-support :as apptxnres]
-            [pe-apptxn-restsupport.meta :as apptxnmeta]
-            [pe-apptxn-restsupport.version.resource-support-v001]
             [pe-user-rest.utils :as userresutils]
             [pe-user-rest.meta :as usermeta]
             [pe-user-rest.resource.users-res :as userres]
@@ -62,61 +54,55 @@
           usermeta/pathcomp-login))
 
 (def changelog-uri-template
-  (format "%s%s/:user-entid/%s"
+  (format "%s%s/:user-id/%s"
           config/fp-entity-uri-prefix
           usermeta/pathcomp-users
           clmeta/pathcomp-changelog))
 
-(def apptxnset-uri-template
-  (format "%s%s/:user-entid/%s"
-          config/fp-entity-uri-prefix
-          usermeta/pathcomp-users
-          apptxnmeta/pathcomp-apptxnset))
-
 (def vehicles-uri-template
-  (format "%s%s/:user-entid/%s"
+  (format "%s%s/:user-id/%s"
           config/fp-entity-uri-prefix
           usermeta/pathcomp-users
           meta/pathcomp-vehicles))
 
 (def vehicle-uri-template
-  (format "%s%s/:user-entid/%s/:vehicle-entid"
+  (format "%s%s/:user-id/%s/:vehicle-id"
           config/fp-entity-uri-prefix
           usermeta/pathcomp-users
           meta/pathcomp-vehicles))
 
 (def fuelstations-uri-template
-  (format "%s%s/:user-entid/%s"
+  (format "%s%s/:user-id/%s"
           config/fp-entity-uri-prefix
           usermeta/pathcomp-users
           meta/pathcomp-fuelstations))
 
 (def fuelstation-uri-template
-  (format "%s%s/:user-entid/%s/:fuelstation-entid"
+  (format "%s%s/:user-id/%s/:fuelstation-id"
           config/fp-entity-uri-prefix
           usermeta/pathcomp-users
           meta/pathcomp-fuelstations))
 
 (def envlogs-uri-template
-  (format "%s%s/:user-entid/%s"
+  (format "%s%s/:user-id/%s"
           config/fp-entity-uri-prefix
           usermeta/pathcomp-users
           meta/pathcomp-environment-logs))
 
 (def envlog-uri-template
-  (format "%s%s/:user-entid/%s/:envlog-entid"
+  (format "%s%s/:user-id/%s/:envlog-id"
           config/fp-entity-uri-prefix
           usermeta/pathcomp-users
           meta/pathcomp-environment-logs))
 
 (def fplogs-uri-template
-  (format "%s%s/:user-entid/%s"
+  (format "%s%s/:user-id/%s"
           config/fp-entity-uri-prefix
           usermeta/pathcomp-users
           meta/pathcomp-fuelpurchase-logs))
 
 (def fplog-uri-template
-  (format "%s%s/:user-entid/%s/:fplog-entid"
+  (format "%s%s/:user-id/%s/:fplog-id"
           config/fp-entity-uri-prefix
           usermeta/pathcomp-users
           meta/pathcomp-fuelpurchase-logs))
@@ -129,7 +115,7 @@
    base-url
    entity-uri-prefix
    entity-uri
-   user-entid]
+   user-id]
   (let [link-fn (fn [rel mt-subtype-fn path-comp]
                   (rucore/make-abs-link version
                                         rel
@@ -138,7 +124,7 @@
                                         (str config/fp-entity-uri-prefix
                                              usermeta/pathcomp-users
                                              "/"
-                                             user-entid
+                                             user-id
                                              "/"
                                              path-comp)))]
     (-> {}
@@ -156,26 +142,23 @@
                                     fpmeta/pathcomp-fuelpurchase-logs))
         (rucore/assoc-link (link-fn clmeta/changelog-relation
                                     clmeta/mt-subtype-changelog
-                                    clmeta/pathcomp-changelog))
-        (rucore/assoc-link (link-fn apptxnmeta/apptxnset-relation
-                                    apptxnmeta/mt-subtype-apptxnset
-                                    apptxnmeta/pathcomp-apptxnset)))))
+                                    clmeta/pathcomp-changelog)))))
 
 (defn make-user-subentity-url
-  [user-entid pathcomp-subent sub-entid]
+  [user-id pathcomp-subent sub-id]
   (rucore/make-abs-link-href config/fp-base-url
                              (str config/fp-entity-uri-prefix
                                   usermeta/pathcomp-users
                                   "/"
-                                  user-entid
+                                  user-id
                                   "/"
                                   pathcomp-subent
                                   "/"
-                                  sub-entid)))
+                                  sub-id)))
 
 (defn embedded-user-subentity
-  [user-entid
-   sub-entid
+  [user-id
+   sub-id
    sub-ent-attr
    mt-subtype-fn
    pathcomp-subent
@@ -184,25 +167,25 @@
    entity
    version
    format-ind]
-  (let [subent-txn-time (ducore/txn-time conn sub-entid)]
+  #_(let [subent-txn-time (ducore/txn-time conn sub-id)]
     {:media-type (rucore/media-type rumeta/mt-type
                                     (mt-subtype-fn config/fp-mt-subtype-prefix)
                                     version
                                     format-ind)
-     :location (make-user-subentity-url user-entid pathcomp-subent sub-entid)
+     :location (make-user-subentity-url user-id pathcomp-subent sub-id)
      :payload (-> entity
                   (assoc :last-modified (.getTime subent-txn-time))
                   (payload-transform-fn))}))
 
 (defn embedded-vehicle
-  [user-entid
-   vehicle-entid
+  [user-id
+   vehicle-id
    conn
    vehicle
    version
    format-ind]
-  (embedded-user-subentity user-entid
-                           vehicle-entid
+  (embedded-user-subentity user-id
+                           vehicle-id
                            :fpvehicle/name
                            fpmeta/mt-subtype-vehicle
                            fpmeta/pathcomp-vehicles
@@ -213,14 +196,14 @@
                            format-ind))
 
 (defn embedded-fuelstation
-  [user-entid
-   fuelstation-entid
+  [user-id
+   fuelstation-id
    conn
    fuelstation
    version
    format-ind]
-  (embedded-user-subentity user-entid
-                           fuelstation-entid
+  (embedded-user-subentity user-id
+                           fuelstation-id
                            :fpfuelstation/name
                            fpmeta/mt-subtype-fuelstation
                            fpmeta/pathcomp-fuelstations
@@ -231,52 +214,52 @@
                            format-ind))
 
 (defn embedded-fplog
-  [user-entid
-   fplog-entid
+  [user-id
+   fplog-id
    conn
    fplog
    version
    format-ind]
-  (embedded-user-subentity user-entid
-                           fplog-entid
+  (embedded-user-subentity user-id
+                           fplog-id
                            :fpfuelpurchaselog/purchase-date
                            fpmeta/mt-subtype-fplog
                            fpmeta/pathcomp-fuelpurchase-logs
                            (fn [fplog]
-                             (let [vehicle-entid (:db/id (:fpfuelpurchaselog/vehicle fplog))
-                                   fuelstation-entid (:db/id (:fpfuelpurchaselog/fuelstation fplog))]
+                             (let [vehicle-id (:db/id (:fpfuelpurchaselog/vehicle fplog))
+                                   fuelstation-id (:db/id (:fpfuelpurchaselog/fuelstation fplog))]
                                (-> fplog
                                    (dissoc :fpfuelpurchaselog/user)
-                                   (assoc :fpfuelpurchaselog/vehicle (make-user-subentity-url user-entid
+                                   (assoc :fpfuelpurchaselog/vehicle (make-user-subentity-url user-id
                                                                                               fpmeta/pathcomp-vehicles
-                                                                                              vehicle-entid))
-                                   (assoc :fpfuelpurchaselog/fuelstation (make-user-subentity-url user-entid
+                                                                                              vehicle-id))
+                                   (assoc :fpfuelpurchaselog/fuelstation (make-user-subentity-url user-id
                                                                                                   fpmeta/pathcomp-fuelstations
-                                                                                                  fuelstation-entid)))))
+                                                                                                  fuelstation-id)))))
                            conn
                            fplog
                            version
                            format-ind))
 
 (defn embedded-envlog
-  [user-entid
-   envlog-entid
+  [user-id
+   envlog-id
    conn
    envlog
    version
    format-ind]
-  (embedded-user-subentity user-entid
-                           envlog-entid
+  (embedded-user-subentity user-id
+                           envlog-id
                            :fpenvironmentlog/log-date
                            fpmeta/mt-subtype-envlog
                            fpmeta/pathcomp-environment-logs
                            (fn [envlog]
-                             (let [vehicle-entid (:db/id (:fpenvironmentlog/vehicle envlog))]
+                             (let [vehicle-id (:db/id (:fpenvironmentlog/vehicle envlog))]
                                (-> envlog
                                    (dissoc :fpenvironmentlog/user)
-                                   (assoc :fpenvironmentlog/vehicle (make-user-subentity-url user-entid
+                                   (assoc :fpenvironmentlog/vehicle (make-user-subentity-url user-id
                                                                                              fpmeta/pathcomp-vehicles
-                                                                                             vehicle-entid)))))
+                                                                                             vehicle-id)))))
                            conn
                            envlog
                            version
@@ -289,38 +272,38 @@
    entity-uri
    conn
    accept-format-ind
-   user-entid]
-  (let [vehicles (fpcore/vehicles-for-user conn user-entid)
-        fuelstations (fpcore/fuelstations-for-user conn user-entid)
-        fplogs (fpcore/fplogs-for-user conn user-entid)
-        envlogs (fpcore/envlogs-for-user conn user-entid)]
-    (vec (concat (map (fn [[veh-entid vehicle]]
-                        (embedded-vehicle user-entid
-                                          veh-entid
+   user-id]
+  (let [vehicles (fpcore/vehicles-for-user conn user-id)
+        fuelstations (fpcore/fuelstations-for-user conn user-id)
+        fplogs (fpcore/fplogs-for-user conn user-id)
+        envlogs (fpcore/envlogs-for-user conn user-id)]
+    (vec (concat (map (fn [[veh-id vehicle]]
+                        (embedded-vehicle user-id
+                                          veh-id
                                           conn
                                           vehicle
                                           version
                                           accept-format-ind))
                       vehicles)
-                 (map (fn [[fuelstation-entid fuelstation]]
-                        (embedded-fuelstation user-entid
-                                              fuelstation-entid
+                 (map (fn [[fuelstation-id fuelstation]]
+                        (embedded-fuelstation user-id
+                                              fuelstation-id
                                               conn
                                               fuelstation
                                               version
                                               accept-format-ind))
                       fuelstations)
-                 (map (fn [[fplog-entid fplog]]
-                        (embedded-fplog user-entid
-                                        fplog-entid
+                 (map (fn [[fplog-id fplog]]
+                        (embedded-fplog user-id
+                                        fplog-id
                                         conn
                                         fplog
                                         version
                                         accept-format-ind))
                       fplogs)
-                 (map (fn [[envlog-entid envlog]]
-                        (embedded-envlog user-entid
-                                         envlog-entid
+                 (map (fn [[envlog-id envlog]]
+                        (embedded-envlog user-id
+                                         envlog-id
                                          conn
                                          envlog
                                          version
@@ -333,57 +316,27 @@
 (defroutes fp-routes
   (ANY users-uri-template
        []
-       (userres/users-res @config/conn
-                          config/fp-partition
-                          config/fp-apptxn-partition
+       (userres/users-res config/db-spec
                           config/fp-mt-subtype-prefix
                           config/fphdr-auth-token
                           config/fphdr-error-mask
                           config/fp-base-url
                           config/fp-entity-uri-prefix
-                          config/fphdr-apptxn-id
-                          config/fphdr-useragent-device-make
-                          config/fphdr-useragent-device-os
-                          config/fphdr-useragent-device-os-version
                           config/fphdr-establish-session
                           nil
                           user-links-fn))
   (ANY login-uri-template
        []
-       (loginres/login-res @config/conn
-                           config/fp-partition
-                           config/fp-apptxn-partition
+       (loginres/login-res config/db-spec
                            config/fp-mt-subtype-prefix
                            config/fphdr-auth-token
                            config/fphdr-error-mask
                            config/fp-base-url
                            config/fp-entity-uri-prefix
-                           config/fphdr-apptxn-id
-                           config/fphdr-useragent-device-make
-                           config/fphdr-useragent-device-os
-                           config/fphdr-useragent-device-os-version
                            user-embedded-fn
                            user-links-fn))
-  (ANY apptxnset-uri-template
-       [user-entid]
-       (apptxnres/apptxnset-res @config/conn
-                                config/fp-apptxn-partition
-                                config/fp-mt-subtype-prefix
-                                config/fphdr-auth-token
-                                config/fphdr-error-mask
-                                config/fp-base-url
-                                config/fp-entity-uri-prefix
-                                config/fphdr-apptxn-id
-                                config/fphdr-useragent-device-make
-                                config/fphdr-useragent-device-os
-                                config/fphdr-useragent-device-os-version
-                                (fn [ctx] (userresutils/authorized? ctx
-                                                                    @config/conn
-                                                                    (Long. user-entid)
-                                                                    config/fp-auth-scheme
-                                                                    config/fp-auth-scheme-param-name))))
-  (ANY changelog-uri-template
-       [user-entid]
+  #_(ANY changelog-uri-template
+       [user-id]
        (letfn [(mt-fn-maker [mt-subtype-fn]
                  (fn [version accept-format-ind]
                    (rucore/media-type rumeta/mt-type
@@ -391,58 +344,53 @@
                                       version
                                       accept-format-ind)))
                (loc-fn-maker [pathcomp]
-                 (fn [entid]
-                   (make-user-subentity-url user-entid pathcomp entid)))]
-         (let [user-entid-l (Long. user-entid)]
-           (clres/changelog-res @config/conn
-                                config/fp-apptxn-partition
+                 (fn [id]
+                   (make-user-subentity-url user-id pathcomp id)))]
+         (let [user-id-l (Long. user-id)]
+           (clres/changelog-res config/db-spec
                                 config/fp-mt-subtype-prefix
                                 config/fphdr-auth-token
                                 config/fphdr-error-mask
                                 config/fp-base-url
                                 config/fp-entity-uri-prefix
-                                config/fphdr-apptxn-id
-                                config/fphdr-useragent-device-make
-                                config/fphdr-useragent-device-os
-                                config/fphdr-useragent-device-os-version
                                 (fn [ctx] (userresutils/authorized? ctx
-                                                                    @config/conn
-                                                                    user-entid-l
+                                                                    config/db-spec
+                                                                    user-id-l
                                                                     config/fp-auth-scheme
                                                                     config/fp-auth-scheme-param-name))
-                                user-entid-l
-                                [[user-entid-l
+                                user-id-l
+                                [[user-id-l
                                   :user/hashed-password
                                   (mt-fn-maker usermeta/mt-subtype-user)
-                                  (fn [user-entid] (rucore/make-abs-link-href config/fp-base-url
+                                  (fn [user-id] (rucore/make-abs-link-href config/fp-base-url
                                                                               (str config/fp-entity-uri-prefix
                                                                                    usermeta/pathcomp-users
                                                                                    "/"
-                                                                                   user-entid)))
+                                                                                   user-id)))
                                   user-links-fn
                                   [:user/auth-token
                                    :user/hashed-password
                                    :user/password]]
                                  [:fpvehicle/user
-                                  user-entid-l
+                                  user-id-l
                                   (mt-fn-maker fpmeta/mt-subtype-vehicle)
                                   (loc-fn-maker fpmeta/pathcomp-vehicles)
                                   nil
                                   [:fpvehicle/user]]
                                  [:fpfuelstation/user
-                                  user-entid-l
+                                  user-id-l
                                   (mt-fn-maker fpmeta/mt-subtype-fuelstation)
                                   (loc-fn-maker fpmeta/pathcomp-fuelstations)
                                   nil
                                   [:fpfuelstation/user]]
                                  [:fpfuelpurchaselog/user
-                                  user-entid-l
+                                  user-id-l
                                   (mt-fn-maker fpmeta/mt-subtype-fplog)
                                   (loc-fn-maker fpmeta/pathcomp-fuelpurchase-logs)
                                   nil
                                   [:fpfuelpurchaselog/user]]
                                  [:fpenvironmentlog/user
-                                  user-entid-l
+                                  user-id-l
                                   (mt-fn-maker fpmeta/mt-subtype-envlog)
                                   (loc-fn-maker fpmeta/pathcomp-environment-logs)
                                   nil
@@ -454,10 +402,8 @@
                                 apptxnres/apptxn-async-logger
                                 apptxnres/make-apptxn))))
   (ANY vehicles-uri-template
-       [user-entid]
-       (vehsres/vehicles-res @config/conn
-                             config/fp-partition
-                             config/fp-apptxn-partition
+       [user-id]
+       (vehsres/vehicles-res config/db-spec
                              config/fp-mt-subtype-prefix
                              config/fphdr-auth-token
                              config/fphdr-error-mask
@@ -465,18 +411,12 @@
                              config/fp-auth-scheme-param-name
                              config/fp-base-url
                              config/fp-entity-uri-prefix
-                             config/fphdr-apptxn-id
-                             config/fphdr-useragent-device-make
-                             config/fphdr-useragent-device-os
-                             config/fphdr-useragent-device-os-version
-                             (Long. user-entid)
+                             (Long. user-id)
                              nil
                              nil))
   (ANY vehicle-uri-template
-       [user-entid vehicle-entid]
-       (vehres/vehicle-res @config/conn
-                           config/fp-partition
-                           config/fp-apptxn-partition
+       [user-id vehicle-id]
+       (vehres/vehicle-res config/db-spec
                            config/fp-mt-subtype-prefix
                            config/fphdr-auth-token
                            config/fphdr-error-mask
@@ -484,19 +424,13 @@
                            config/fp-auth-scheme-param-name
                            config/fp-base-url
                            config/fp-entity-uri-prefix
-                           config/fphdr-apptxn-id
-                           config/fphdr-useragent-device-make
-                           config/fphdr-useragent-device-os
-                           config/fphdr-useragent-device-os-version
-                           (Long. user-entid)
-                           (Long. vehicle-entid)
+                           (Long. user-id)
+                           (Long. vehicle-id)
                            nil
                            nil))
   (ANY fuelstations-uri-template
-       [user-entid]
-       (fssres/fuelstations-res @config/conn
-                                config/fp-partition
-                                config/fp-apptxn-partition
+       [user-id]
+       (fssres/fuelstations-res config/db-spec
                                 config/fp-mt-subtype-prefix
                                 config/fphdr-auth-token
                                 config/fphdr-error-mask
@@ -504,18 +438,12 @@
                                 config/fp-auth-scheme-param-name
                                 config/fp-base-url
                                 config/fp-entity-uri-prefix
-                                config/fphdr-apptxn-id
-                                config/fphdr-useragent-device-make
-                                config/fphdr-useragent-device-os
-                                config/fphdr-useragent-device-os-version
-                                (Long. user-entid)
+                                (Long. user-id)
                                 nil
                                 nil))
   (ANY fuelstation-uri-template
-       [user-entid fuelstation-entid]
-       (fsres/fuelstation-res @config/conn
-                              config/fp-partition
-                              config/fp-apptxn-partition
+       [user-id fuelstation-id]
+       (fsres/fuelstation-res config/db-spec
                               config/fp-mt-subtype-prefix
                               config/fphdr-auth-token
                               config/fphdr-error-mask
@@ -523,19 +451,13 @@
                               config/fp-auth-scheme-param-name
                               config/fp-base-url
                               config/fp-entity-uri-prefix
-                              config/fphdr-apptxn-id
-                              config/fphdr-useragent-device-make
-                              config/fphdr-useragent-device-os
-                              config/fphdr-useragent-device-os-version
-                              (Long. user-entid)
-                              (Long. fuelstation-entid)
+                              (Long. user-id)
+                              (Long. fuelstation-id)
                               nil
                               nil))
   (ANY envlogs-uri-template
-       [user-entid]
-       (envlogsres/envlogs-res @config/conn
-                               config/fp-partition
-                               config/fp-apptxn-partition
+       [user-id]
+       (envlogsres/envlogs-res config/db-spec
                                config/fp-mt-subtype-prefix
                                config/fphdr-auth-token
                                config/fphdr-error-mask
@@ -543,18 +465,12 @@
                                config/fp-auth-scheme-param-name
                                config/fp-base-url
                                config/fp-entity-uri-prefix
-                               config/fphdr-apptxn-id
-                               config/fphdr-useragent-device-make
-                               config/fphdr-useragent-device-os
-                               config/fphdr-useragent-device-os-version
-                               (Long. user-entid)
+                               (Long. user-id)
                                nil
                                nil))
   (ANY envlog-uri-template
-       [user-entid envlog-entid]
-       (envlogres/envlog-res @config/conn
-                             config/fp-partition
-                             config/fp-apptxn-partition
+       [user-id envlog-id]
+       (envlogres/envlog-res config/db-spec
                              config/fp-mt-subtype-prefix
                              config/fphdr-auth-token
                              config/fphdr-error-mask
@@ -562,19 +478,13 @@
                              config/fp-auth-scheme-param-name
                              config/fp-base-url
                              config/fp-entity-uri-prefix
-                             config/fphdr-apptxn-id
-                             config/fphdr-useragent-device-make
-                             config/fphdr-useragent-device-os
-                             config/fphdr-useragent-device-os-version
-                             (Long. user-entid)
-                             (Long. envlog-entid)
+                             (Long. user-id)
+                             (Long. envlog-id)
                              nil
                              nil))
   (ANY fplogs-uri-template
-       [user-entid]
-       (fplogsres/fplogs-res @config/conn
-                             config/fp-partition
-                             config/fp-apptxn-partition
+       [user-id]
+       (fplogsres/fplogs-res config/db-spec
                              config/fp-mt-subtype-prefix
                              config/fphdr-auth-token
                              config/fphdr-error-mask
@@ -582,18 +492,12 @@
                              config/fp-auth-scheme-param-name
                              config/fp-base-url
                              config/fp-entity-uri-prefix
-                             config/fphdr-apptxn-id
-                             config/fphdr-useragent-device-make
-                             config/fphdr-useragent-device-os
-                             config/fphdr-useragent-device-os-version
-                             (Long. user-entid)
+                             (Long. user-id)
                              nil
                              nil))
   (ANY fplog-uri-template
-       [user-entid fplog-entid]
-       (fplogres/fplog-res @config/conn
-                           config/fp-partition
-                           config/fp-apptxn-partition
+       [user-id fplog-id]
+       (fplogres/fplog-res config/db-spec
                            config/fp-mt-subtype-prefix
                            config/fphdr-auth-token
                            config/fphdr-error-mask
@@ -601,12 +505,8 @@
                            config/fp-auth-scheme-param-name
                            config/fp-base-url
                            config/fp-entity-uri-prefix
-                           config/fphdr-apptxn-id
-                           config/fphdr-useragent-device-make
-                           config/fphdr-useragent-device-os
-                           config/fphdr-useragent-device-os-version
-                           (Long. user-entid)
-                           (Long. fplog-entid)
+                           (Long. user-id)
+                           (Long. fplog-id)
                            nil
                            nil)))
 
