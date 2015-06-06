@@ -35,7 +35,6 @@
     (is (nil? (usercore/load-user-by-email config/db-spec "smithka@testing.com")))
     (is (nil? (usercore/load-user-by-username config/db-spec "smithk")))
     (let [user {:user/name "Karen Smith"
-                :user/created-at (c/to-long (t/now))
                 :user/email "smithka@testing.com"
                 :user/password "insecure"}]
       (usercore/save-new-user config/db-spec
@@ -96,7 +95,6 @@
         ;; Create 1st vehicle
         (is (empty? (fpcore/vehicles-for-user config/db-spec loaded-user-entid)))
         (let [vehicle {"fpvehicle/name" "300Z"
-                       "fpvehicle/created-at" (c/to-long (t/now))
                        "fpvehicle/default-octane" 93}
               vehicles-uri (str config/fp-base-url
                                 config/fp-entity-uri-prefix
@@ -150,7 +148,6 @@
 
                     ;; Create 2nd vehicle
                     (let [vehicle {"fpvehicle/name" "Mazda CX-9"
-                                   "fpvehicle/created-at" (c/to-long (t/now))
                                    "fpvehicle/default-octane" 87}
                           req (-> (rtucore/req-w-std-hdrs rumeta/mt-type
                                                           (fpmeta/mt-subtype-vehicle config/fp-mt-subtype-prefix)
@@ -206,7 +203,6 @@
     (is (nil? (usercore/load-user-by-email config/db-spec "smithka@testing.com")))
     (is (nil? (usercore/load-user-by-username config/db-spec "smithk")))
     (let [user {:user/name "Karen Smith"
-                :user/created-at (c/to-long (t/now))
                 :user/email "smithka@testing.com"
                 :user/password "insecure"}]
       (usercore/save-new-user config/db-spec
@@ -246,7 +242,6 @@
         ;; Create 1st vehicle
         (is (empty? (fpcore/vehicles-for-user config/db-spec loaded-user-entid)))
         (let [vehicle {"fpvehicle/name" "300Z"
-                       "fpvehicle/created-at" (c/to-long (t/now))
                        "fpvehicle/default-octane" 93}
               vehicles-uri (str config/fp-base-url
                                 config/fp-entity-uri-prefix
@@ -301,7 +296,6 @@
                     (is (not (nil? (:fpvehicle/updated-at loaded-veh-300z))))
                     ;; Create 2nd vehicle
                     (let [vehicle {"fpvehicle/name" "Mazda CX-9"
-                                   "fpvehicle/created-at" (c/to-long (t/now))
                                    "fpvehicle/default-octane" 87}
                           req (-> (rtucore/req-w-std-hdrs rumeta/mt-type
                                                           (fpmeta/mt-subtype-vehicle config/fp-mt-subtype-prefix)
@@ -355,7 +349,6 @@
     (is (nil? (usercore/load-user-by-email config/db-spec "smithka@testing.com")))
     (is (nil? (usercore/load-user-by-username config/db-spec "smithk")))
     (let [user {"user/name" "Karen Smith"
-                "user/created-at" (c/to-long (t/now))
                 "user/email" "smithka@testing.com"
                 "user/username" "smithk"
                 "user/password" "insecure"}
@@ -389,7 +382,6 @@
         ;; Create 1st vehicle
         (is (empty? (fpcore/vehicles-for-user config/db-spec loaded-user-entid)))
         (let [vehicle {"fpvehicle/name" "300Z"
-                       "fpvehicle/created-at" (c/to-long (t/now))
                        "fpvehicle/default-octane" 93}
               vehicles-uri (str config/fp-base-url
                                 config/fp-entity-uri-prefix
@@ -441,7 +433,6 @@
 
                     ;; Create 2nd vehicle
                     (let [vehicle {"fpvehicle/name" "Mazda CX-9"
-                                   "fpvehicle/created-at" (c/to-long (t/now))
                                    "fpvehicle/default-octane" 87}
                           req (-> (rtucore/req-w-std-hdrs rumeta/mt-type
                                                           (fpmeta/mt-subtype-vehicle config/fp-mt-subtype-prefix)

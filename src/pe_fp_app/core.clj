@@ -167,15 +167,13 @@
    entity
    version
    format-ind]
-  #_(let [subent-txn-time (ducore/txn-time conn sub-id)]
-    {:media-type (rucore/media-type rumeta/mt-type
-                                    (mt-subtype-fn config/fp-mt-subtype-prefix)
-                                    version
-                                    format-ind)
-     :location (make-user-subentity-url user-id pathcomp-subent sub-id)
-     :payload (-> entity
-                  (assoc :last-modified (.getTime subent-txn-time))
-                  (payload-transform-fn))}))
+  {:media-type (rucore/media-type rumeta/mt-type
+                                  (mt-subtype-fn config/fp-mt-subtype-prefix)
+                                  version
+                                  format-ind)
+   :location (make-user-subentity-url user-id pathcomp-subent sub-id)
+   :payload (-> entity
+                (payload-transform-fn))})
 
 (defn embedded-vehicle
   [user-id
@@ -222,20 +220,20 @@
    format-ind]
   (embedded-user-subentity user-id
                            fplog-id
-                           :fpfuelpurchaselog/purchase-date
+                           :fplog/purchased-at
                            fpmeta/mt-subtype-fplog
                            fpmeta/pathcomp-fuelpurchase-logs
                            (fn [fplog]
-                             (let [vehicle-id (:db/id (:fpfuelpurchaselog/vehicle fplog))
-                                   fuelstation-id (:db/id (:fpfuelpurchaselog/fuelstation fplog))]
+                             (let [vehicle-id (:db/id (:fplog/vehicle fplog))
+                                   fuelstation-id (:db/id (:fplog/fuelstation fplog))]
                                (-> fplog
-                                   (dissoc :fpfuelpurchaselog/user)
-                                   (assoc :fpfuelpurchaselog/vehicle (make-user-subentity-url user-id
-                                                                                              fpmeta/pathcomp-vehicles
-                                                                                              vehicle-id))
-                                   (assoc :fpfuelpurchaselog/fuelstation (make-user-subentity-url user-id
-                                                                                                  fpmeta/pathcomp-fuelstations
-                                                                                                  fuelstation-id)))))
+                                   (dissoc :fplog/user)
+                                   (assoc :fplog/vehicle (make-user-subentity-url user-id
+                                                                                  fpmeta/pathcomp-vehicles
+                                                                                  vehicle-id))
+                                   (assoc :fplog/fuelstation (make-user-subentity-url user-id
+                                                                                      fpmeta/pathcomp-fuelstations
+                                                                                      fuelstation-id)))))
                            conn
                            fplog
                            version
@@ -383,12 +381,12 @@
                                   (loc-fn-maker fpmeta/pathcomp-fuelstations)
                                   nil
                                   [:fpfuelstation/user]]
-                                 [:fpfuelpurchaselog/user
+                                 [:fplog/user
                                   user-id-l
                                   (mt-fn-maker fpmeta/mt-subtype-fplog)
                                   (loc-fn-maker fpmeta/pathcomp-fuelpurchase-logs)
                                   nil
-                                  [:fpfuelpurchaselog/user]]
+                                  [:fplog/user]]
                                  [:fpenvironmentlog/user
                                   user-id-l
                                   (mt-fn-maker fpmeta/mt-subtype-envlog)
