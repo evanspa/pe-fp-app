@@ -1,4 +1,4 @@
-(defproject pe-fp-app "0.0.4"
+(defproject pe-fp-app "0.0.5"
   :description "The fuel purchase application REST API endpoint."
   :url "https://github.com/evanspa/pe-fp-app"
   :license {:name "MIT"
@@ -21,7 +21,7 @@
                  [environ "1.0.0"]
                  [pe-jdbc-utils "0.0.3"]
                  [pe-core-utils "0.0.11"]
-                 [pe-rest-utils "0.0.10"]
+                 [pe-rest-utils "0.0.12"]
                  [pe-user-core "0.1.12"]
                  [pe-user-rest "0.0.16"]
                  [pe-fp-rest "0.0.7"]]

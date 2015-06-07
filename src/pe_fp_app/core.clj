@@ -1,6 +1,8 @@
 (ns pe-fp-app.core
   (:require [clojure.data.json :as json]
             [liberator.dev :refer [wrap-trace]]
+            [clj-time.core :as t]
+            [clj-time.coerce :as c]
             [clojure.tools.logging :as log]
             [compojure.core :refer [defroutes ANY]]
             [ring.middleware.cookies :refer [wrap-cookies]]
@@ -187,7 +189,10 @@
                            :fpvehicle/name
                            fpmeta/mt-subtype-vehicle
                            fpmeta/pathcomp-vehicles
-                           #(-> % (dissoc :fpvehicle/user))
+                           (fn [vehicle]
+                             (-> vehicle
+                                 (ucore/transform-map-val :fpvehicle/created-at #(c/to-long %))
+                                 (ucore/transform-map-val :fpvehicle/updated-at #(c/to-long %))))
                            conn
                            vehicle
                            version
@@ -205,7 +210,10 @@
                            :fpfuelstation/name
                            fpmeta/mt-subtype-fuelstation
                            fpmeta/pathcomp-fuelstations
-                           #(-> % (dissoc :fpfuelstation/user))
+                           (fn [fuelstation]
+                             (-> fuelstation
+                                 (ucore/transform-map-val :fpfuelstation/created-at #(c/to-long %))
+                                 (ucore/transform-map-val :fpfuelstation/updated-at #(c/to-long %))))
                            conn
                            fuelstation
                            version
@@ -224,10 +232,12 @@
                            fpmeta/mt-subtype-fplog
                            fpmeta/pathcomp-fuelpurchase-logs
                            (fn [fplog]
-                             (let [vehicle-id (:db/id (:fplog/vehicle fplog))
-                                   fuelstation-id (:db/id (:fplog/fuelstation fplog))]
+                             (let [vehicle-id (:fplog/vehicle-id fplog)
+                                   fuelstation-id (:fplog/fuelstation-id fplog)]
                                (-> fplog
-                                   (dissoc :fplog/user)
+                                   (ucore/transform-map-val :fplog/created-at #(c/to-long %))
+                                   (ucore/transform-map-val :fplog/updated-at #(c/to-long %))
+                                   (ucore/transform-map-val :fplog/purchased-at #(c/to-long %))
                                    (assoc :fplog/vehicle (make-user-subentity-url user-id
                                                                                   fpmeta/pathcomp-vehicles
                                                                                   vehicle-id))
@@ -252,10 +262,12 @@
                            fpmeta/mt-subtype-envlog
                            fpmeta/pathcomp-environment-logs
                            (fn [envlog]
-                             (let [vehicle-id (:db/id (:fpenvironmentlog/vehicle envlog))]
+                             (let [vehicle-id (:envlog/vehicle-id envlog)]
                                (-> envlog
-                                   (dissoc :fpenvironmentlog/user)
-                                   (assoc :fpenvironmentlog/vehicle (make-user-subentity-url user-id
+                                   (ucore/transform-map-val :envlog/created-at #(c/to-long %))
+                                   (ucore/transform-map-val :envlog/updated-at #(c/to-long %))
+                                   (ucore/transform-map-val :envlog/logged-at #(c/to-long %))
+                                   (assoc :envlog/vehicle (make-user-subentity-url user-id
                                                                                              fpmeta/pathcomp-vehicles
                                                                                              vehicle-id)))))
                            conn
@@ -387,12 +399,12 @@
                                   (loc-fn-maker fpmeta/pathcomp-fuelpurchase-logs)
                                   nil
                                   [:fplog/user]]
-                                 [:fpenvironmentlog/user
+                                 [:envlog/user
                                   user-id-l
                                   (mt-fn-maker fpmeta/mt-subtype-envlog)
                                   (loc-fn-maker fpmeta/pathcomp-environment-logs)
                                   nil
-                                  [:fpenvironmentlog/user]]]
+                                  [:envlog/user]]]
                                 fpapptxn/fpapptxn-changelog-fetch
                                 fpapptxn/fpapptxnlog-fetchclsince-remote-proc-started
                                 fpapptxn/fpapptxnlog-fetchclsince-remote-proc-done-success
@@ -514,6 +526,6 @@
 (def fp-app
   (-> fp-routes
       (handler/api)
-      (wrap-trace :header)
+      ;(wrap-trace :header)
       (wrap-params)
       (wrap-cookies)))

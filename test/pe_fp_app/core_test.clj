@@ -24,6 +24,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-fixtures :each (fn [f]
                       (jcore/drop-database config/db-spec-without-db config/fp-db-name)
+                      (jcore/create-database config/db-spec-without-db config/fp-db-name)
                       (lifecycle/init-database)
                       (f)))
 
@@ -36,9 +37,10 @@
     (is (nil? (usercore/load-user-by-username config/db-spec "smithk")))
     (let [user {:user/name "Karen Smith"
                 :user/email "smithka@testing.com"
-                :user/password "insecure"}]
+                :user/password "insecure"}
+          new-user-id (usercore/next-user-account-id config/db-spec)]
       (usercore/save-new-user config/db-spec
-                              (usercore/next-user-account-id config/db-spec)
+                              new-user-id
                               user)
       (is (not (nil? (usercore/load-user-by-email config/db-spec "smithka@testing.com")))))
     ;; 1st Login
