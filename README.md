@@ -8,7 +8,15 @@ purchase system consists of 2 tiers:
 pe-fp-app represents the server application; it exposes a REST API endpoint to
 client applications.
 
-pe-fp-app makes use of the [pe-* Clojure library suite](#pe--clojure-library-suite).  In addition to using the pe-* library suite, it leverages [pe-fp-rest](https://github.com/evanspa/pe-fp-rest), which implements the underlying fuel purchase-specific resources of the REST API.  pe-fp-rest is built on top of [pe-fp-core](https://github.com/evanspa/pe-fp-core), which implements the core logic, model and data access functionality of the REST application.  These tiers are illustrated in the [component layering](#component-layering) diagram below.
+pe-fp-app makes use of the
+[pe-* Clojure library suite](#pe--clojure-library-suite).  In addition to using
+the pe-* library suite, it leverages
+[pe-fp-rest](https://github.com/evanspa/pe-fp-rest), which implements the
+underlying fuel purchase-specific resources of the REST API.  pe-fp-rest is
+built on top of [pe-fp-core](https://github.com/evanspa/pe-fp-core), which
+implements the core logic, model and data access functionality of the REST
+application.  These tiers are illustrated in the
+[component layering](#component-layering) diagram below.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -61,13 +69,15 @@ The pe-* Clojure library suite is a set of Clojure libraries to aid in the
 development of Clojure based applications.
 *(Each library is available on Clojars.)*
 + **[pe-core-utils](https://github.com/evanspa/pe-core-utils)**: provides a set
-  of various collection-related, date-related and other helpers functions.
+of various collection-related, date-related and other helpers functions.
++ **[pe-jdbc-utils](https://github.com/evanspa/pe-jdbc-utils)**: provides
+  a set of helper functions for working with JDBC.
 + **[pe-datomic-utils](https://github.com/evanspa/pe-datomic-utils)**: provides
   a set of helper functions for working with [Datomic](https://www.datomic.com).
 + **[pe-datomic-testutils](https://github.com/evanspa/pe-datomic-testutils)**: provides
   a set of helper functions to aid in unit testing Datomic-enabled functions.
 + **[pe-user-core](https://github.com/evanspa/pe-user-core)**: provides
-  a set of functions for modeling a generic user, leveraging Datomic as a
+  a set of functions for modeling a generic user, leveraging PostgreSQL as a
   backend store.
 + **[pe-user-testutils](https://github.com/evanspa/pe-user-testutils)**: a set of helper functions to aid in unit testing
 code that depends on the functionality of the pe-user-* libraries
@@ -82,7 +92,7 @@ code that depends on the functionality of the pe-user-* libraries
   a set of helper functions for unit testing web services.
 + **[pe-user-rest](https://github.com/evanspa/pe-user-rest)**: provides a set of
   functions encapsulating an abstraction modeling a user within a REST API
-  and leveraging [Datomic](http://www.datomic.com).
+  and leveraging PostgreSQL.
 + **[pe-apptxn-restsupport](https://github.com/evanspa/pe-apptxn-restsupport)**:
   provides a set of functions implementing the server-side REST layer of the
   PEAppTransaction Logging Framework.
