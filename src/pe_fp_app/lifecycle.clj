@@ -64,8 +64,7 @@
 (defn init-database
   []
   ;; Database setup
-  (log/info "Proceeding to create database")
-  (jcore/create-database config/db-spec-without-db config/fp-db-name)
+  (log/info "Proceeding to setup database")
 
   ;; Create schema version table
   (j/db-do-commands config/db-spec true uddl/schema-version-ddl)
