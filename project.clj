@@ -1,4 +1,4 @@
-(defproject pe-fp-app "0.0.5"
+(defproject pe-fp-app "0.0.6"
   :description "The fuel purchase application REST API endpoint."
   :url "https://github.com/evanspa/pe-fp-app"
   :license {:name "MIT"
@@ -24,7 +24,8 @@
                  [pe-rest-utils "0.0.12"]
                  [pe-user-core "0.1.12"]
                  [pe-user-rest "0.0.16"]
-                 [pe-fp-rest "0.0.7"]]
+                 [pe-fp-core "0.0.9"]
+                 [pe-fp-rest "0.0.9"]]
   :resource-paths ["resources"]
   :ring {:handler pe-fp-app.core/fp-app
          :init pe-fp-app.lifecycle/init
