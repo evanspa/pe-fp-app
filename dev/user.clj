@@ -18,8 +18,21 @@
 
 (def server (atom nil))
 
-(defn create-and-start-server []
+(defn- create-and-start-server
+  []
   (serve core/fp-app {:port 4040 :open-browser? false :auto-reload? true}))
+
+(defn- go-with-db-refresh []
+  (println "Proceeding to refresh the database")
+  (jcore/drop-database config/db-spec-without-db config/fp-db-name)
+  (jcore/create-database config/db-spec-without-db config/fp-db-name)
+  (lifecycle/init-database)
+  (reset! server (create-and-start-server))
+  (println "Jetty server restarted."))
+
+(defn- go []
+  (reset! server (create-and-start-server))
+  (println "Jetty server restarted."))
 
 (defn reset
   ([] (reset nil))
@@ -29,14 +42,3 @@
        (println "Proceeding to stop server")
        (.stop @server))
      (refresh-all :after go-fn-name))))
-
-(defn- go-with-db-refresh []
-  (println "Proceeding to refresh the database")
-  (jcore/drop-database config/db-spec-without-db config/fp-db-name)
-  (lifecycle/init-database)
-  (reset! server (create-and-start-server))
-  (println "Jetty server restarted."))
-
-(defn- go []
-  (reset! server (create-and-start-server))
-  (println "Jetty server restarted."))

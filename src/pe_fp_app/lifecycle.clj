@@ -81,14 +81,18 @@
                   target-schema-version)
         (dotimes [version do-upper-bound]
           (let [ddl-fn (get ddl-operations version)]
+            (log/info "Proceeding to apply version " version " DDL updates.")
             (ddl-fn))))
       (let [do-upper-bound (- target-schema-version current-schema-version)]
         (log/info "Current schema version installed: "
                   current-schema-version
                   ".  Proceeding to apply DDL operations through target schema version: "
-                  target-schema-version)
+                  target-schema-version
+                  ".")
         (dotimes [version do-upper-bound]
-          (let [ddl-fn (get ddl-operations (+ version (inc current-schema-version)))]
+          (let [version-key (+ version (inc current-schema-version))
+                ddl-fn (get ddl-operations version-key)]
+            (log/info "Proceeding to apply version " version-key " DDL updates.")
             (ddl-fn)))))
     (usercore/set-schema-version config/db-spec target-schema-version)))
 
