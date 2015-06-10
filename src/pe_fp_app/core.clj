@@ -11,8 +11,10 @@
             [pe-fp-app.config :as config]
             [pe-user-rest.utils :as userresutils]
             [pe-user-rest.meta :as usermeta]
-            [pe-user-rest.resource.users-res :as userres]
+            [pe-user-rest.resource.users-res :as usersres]
             [pe-user-rest.resource.version.users-res-v001]
+            [pe-user-rest.resource.user-res :as userres]
+            [pe-user-rest.resource.version.user-res-v001]
             [pe-user-rest.resource.login-res :as loginres]
             [pe-user-rest.resource.version.login-res-v001]
             [pe-fp-rest.meta :as fpmeta]
@@ -54,6 +56,11 @@
   (format "%s%s"
           config/fp-entity-uri-prefix
           usermeta/pathcomp-login))
+
+(def user-uri-template
+  (format "%s%s/:user-id"
+          config/fp-entity-uri-prefix
+          usermeta/pathcomp-users))
 
 (def changelog-uri-template
   (format "%s%s/:user-id/%s"
@@ -326,7 +333,7 @@
 (defroutes fp-routes
   (ANY users-uri-template
        []
-       (userres/users-res config/db-spec
+       (usersres/users-res config/db-spec
                           config/fp-mt-subtype-prefix
                           config/fphdr-auth-token
                           config/fphdr-error-mask
@@ -345,6 +352,19 @@
                            config/fp-entity-uri-prefix
                            user-embedded-fn
                            user-links-fn))
+  (ANY user-uri-template
+       [user-id]
+       (userres/user-res config/db-spec
+                         config/fp-mt-subtype-prefix
+                         config/fphdr-auth-token
+                         config/fphdr-error-mask
+                         config/fp-auth-scheme
+                         config/fp-auth-scheme-param-name
+                         config/fp-base-url
+                         config/fp-entity-uri-prefix
+                         (Long. user-id)
+                         nil
+                         nil))
   #_(ANY changelog-uri-template
        [user-id]
        (letfn [(mt-fn-maker [mt-subtype-fn]
