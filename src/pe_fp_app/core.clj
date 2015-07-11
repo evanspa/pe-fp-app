@@ -57,6 +57,11 @@
           config/fp-entity-uri-prefix
           usermeta/pathcomp-login))
 
+(def light-login-uri-template
+  (format "%s%s"
+          config/fp-entity-uri-prefix
+          usermeta/pathcomp-light-login))
+
 (def user-uri-template
   (format "%s%s/:user-id"
           config/fp-entity-uri-prefix
@@ -352,6 +357,14 @@
                            config/fp-entity-uri-prefix
                            user-embedded-fn
                            user-links-fn))
+  (ANY light-login-uri-template
+       []
+       (loginres/light-login-res config/db-spec
+                                 config/fp-mt-subtype-prefix
+                                 config/fphdr-auth-token
+                                 config/fphdr-error-mask
+                                 config/fp-base-url
+                                 config/fp-entity-uri-prefix))
   (ANY user-uri-template
        [user-id]
        (userres/user-res config/db-spec
@@ -364,7 +377,7 @@
                          config/fp-entity-uri-prefix
                          (Long. user-id)
                          nil
-                         nil))
+                         user-links-fn))
   #_(ANY changelog-uri-template
        [user-id]
        (letfn [(mt-fn-maker [mt-subtype-fn]

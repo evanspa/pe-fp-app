@@ -11,7 +11,7 @@
 
 (def nrepl-server)
 
-(def target-schema-version 1)
+(def target-schema-version 2)
 
 (def ddl-operations
   {0 (fn []
@@ -63,7 +63,12 @@
    1 (fn []
        (j/db-do-commands config/db-spec
                          true
-                         fpddl/v1-vehicle-add-fuel-capacity-col))})
+                         fpddl/v1-vehicle-add-fuel-capacity-col))
+   2 (fn []
+       (j/db-do-commands config/db-spec
+                         true
+                         fpddl/v2-vehicle-drop-erroneous-unique-name-constraint
+                         fpddl/v2-vehicle-add-proper-unique-name-constraint))})
 
 (defn init-database
   []

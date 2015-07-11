@@ -198,7 +198,26 @@
                               (let [[[loaded-veh-mazda-entid loaded-veh-mazda] _] loaded-vehicles]
                                 (is (= (Long/parseLong resp-veh-entid-str) loaded-veh-mazda-entid))
                                 (is (= "Mazda CX-9" (:fpvehicle/name loaded-veh-mazda)))
-                                (is (= 87 (:fpvehicle/default-octane loaded-veh-mazda)))))))))))))))))))
+                                (is (= 87 (:fpvehicle/default-octane loaded-veh-mazda)))))))))))))))))
+    ;; doing a light login
+    (let [user {"user/username-or-email" "smithka@testing.com"
+                "user/password" "insecure"}
+          req (-> (rtucore/req-w-std-hdrs rumeta/mt-type
+                                          (usermeta/mt-subtype-user config/fp-mt-subtype-prefix)
+                                          usermeta/v001
+                                          "UTF-8;q=1,ISO-8859-1;q=0"
+                                          "json"
+                                          "en-US"
+                                          :post
+                                          core/light-login-uri-template)
+                  (mock/body (json/write-str user))
+                  (mock/content-type (rucore/content-type rumeta/mt-type
+                                                          (usermeta/mt-subtype-user config/fp-mt-subtype-prefix)
+                                                          usermeta/v001
+                                                          "json"
+                                                          "UTF-8")))
+          resp (core/fp-app req)]
+      (testing "status code" (is (= 204 (:status resp)))))))
 
 (deftest integration-test-2
   (testing "Login of user and subsequent authenticated request."
@@ -347,7 +366,7 @@
                                 (is (= 87 (:fpvehicle/default-octane loaded-veh-mazda)))))))))))))))))))
 
 (deftest integration-test-3
-  (testing "Successful creation of user, app txn logs and vehicles."
+  (testing "Successful creation of user  and vehicles."
     (is (nil? (usercore/load-user-by-email config/db-spec "smithka@testing.com")))
     (is (nil? (usercore/load-user-by-username config/db-spec "smithk")))
     (let [user {"user/name" "Karen Smith"
