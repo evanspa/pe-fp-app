@@ -11,7 +11,7 @@
 
 (def nrepl-server)
 
-(def target-schema-version 2)
+(def target-schema-version 3)
 
 (def ddl-operations
   {0 (fn []
@@ -23,7 +23,7 @@
                          uddl/v0-add-unique-constraint-user-account-username
                          uddl/v0-create-authentication-token-ddl)
        (jcore/with-try-catch-exec-as-query config/db-spec
-         (uddl/v0-create-updated-count-inc-trigger-function-fn config/db-spec))
+         (uddl/v0-create-updated-count-inc-trigger-fn config/db-spec))
        (jcore/with-try-catch-exec-as-query config/db-spec
          (uddl/v0-create-user-account-updated-count-trigger-fn config/db-spec))
        ;; Vehicle setup
@@ -32,7 +32,7 @@
                          fpddl/v0-create-vehicle-ddl
                          fpddl/v0-add-unique-constraint-vehicle-name)
        (jcore/with-try-catch-exec-as-query config/db-spec
-         (fpddl/v0-create-vehicle-updated-count-inc-trigger-function-fn config/db-spec))
+         (fpddl/v0-create-vehicle-updated-count-inc-trigger-fn config/db-spec))
        (jcore/with-try-catch-exec-as-query config/db-spec
          (fpddl/v0-create-vehicle-updated-count-trigger-fn config/db-spec))
        ;; Fuelstation setup
@@ -41,7 +41,7 @@
                          fpddl/v0-create-fuelstation-ddl
                          fpddl/v0-create-index-on-fuelstation-name)
        (jcore/with-try-catch-exec-as-query config/db-spec
-         (fpddl/v0-create-fuelstation-updated-count-inc-trigger-function-fn config/db-spec))
+         (fpddl/v0-create-fuelstation-updated-count-inc-trigger-fn config/db-spec))
        (jcore/with-try-catch-exec-as-query config/db-spec
          (fpddl/v0-create-fuelstation-updated-count-trigger-fn config/db-spec))
        ;; Fuel purchase log setup
@@ -49,7 +49,7 @@
                          true
                          fpddl/v0-create-fplog-ddl)
        (jcore/with-try-catch-exec-as-query config/db-spec
-         (fpddl/v0-create-fplog-updated-count-inc-trigger-function-fn config/db-spec))
+         (fpddl/v0-create-fplog-updated-count-inc-trigger-fn config/db-spec))
        (jcore/with-try-catch-exec-as-query config/db-spec
          (fpddl/v0-create-fplog-updated-count-trigger-fn config/db-spec))
        ;; Environment log setup
@@ -57,7 +57,7 @@
                          true
                          fpddl/v0-create-envlog-ddl)
        (jcore/with-try-catch-exec-as-query config/db-spec
-         (fpddl/v0-create-envlog-updated-count-inc-trigger-function-fn config/db-spec))
+         (fpddl/v0-create-envlog-updated-count-inc-trigger-fn config/db-spec))
        (jcore/with-try-catch-exec-as-query config/db-spec
          (fpddl/v0-create-envlog-updated-count-trigger-fn config/db-spec)))
    1 (fn []
@@ -68,7 +68,18 @@
        (j/db-do-commands config/db-spec
                          true
                          fpddl/v2-vehicle-drop-erroneous-unique-name-constraint
-                         fpddl/v2-vehicle-add-proper-unique-name-constraint))})
+                         fpddl/v2-vehicle-add-proper-unique-name-constraint))
+   3 (fn []
+       (j/db-do-commands config/db-spec
+                         true
+                         uddl/v1-user-add-deleted-reason-col
+                         uddl/v1-user-add-suspended-at-col
+                         uddl/v1-user-add-suspended-reason-col
+                         uddl/v1-user-add-suspended-count-col)
+       (jcore/with-try-catch-exec-as-query config/db-spec
+         (uddl/v1-create-suspended-count-inc-trigger-fn config/db-spec))
+       (jcore/with-try-catch-exec-as-query config/db-spec
+         (uddl/v1-create-user-account-suspended-count-trigger-fn config/db-spec)))})
 
 (defn init-database
   []

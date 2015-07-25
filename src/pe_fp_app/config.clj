@@ -60,3 +60,6 @@
 (def fphdr-establish-session "fp-establish-session")
 (def fphdr-auth-token "fp-auth-token")
 (def fphdr-error-mask "fp-error-mask")
+(def fphdr-if-unmodified-since "fp-if-unmodified-since")
+(def fphdr-login-failed-reason "fp-login-failed-reason")
+(def fphdr-delete-reason "fp-delete-reason")

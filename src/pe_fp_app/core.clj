@@ -17,6 +17,8 @@
             [pe-user-rest.resource.version.user-res-v001]
             [pe-user-rest.resource.login-res :as loginres]
             [pe-user-rest.resource.version.login-res-v001]
+            [pe-user-rest.resource.logout-res :as logoutres]
+            [pe-user-rest.resource.version.logout-res-v001]
             [pe-fp-rest.meta :as fpmeta]
             [pe-fp-rest.resource.vehicle.vehicles-res :as vehsres]
             [pe-fp-rest.resource.vehicle.version.vehicles-res-v001]
@@ -61,6 +63,12 @@
   (format "%s%s"
           config/fp-entity-uri-prefix
           usermeta/pathcomp-light-login))
+
+(def logout-uri-template
+  (format "%s%s/:user-id/%s"
+          config/fp-entity-uri-prefix
+          usermeta/pathcomp-users
+          usermeta/pathcomp-logout))
 
 (def user-uri-template
   (format "%s%s/:user-id"
@@ -280,8 +288,8 @@
                                    (ucore/transform-map-val :envlog/updated-at #(c/to-long %))
                                    (ucore/transform-map-val :envlog/logged-at #(c/to-long %))
                                    (assoc :envlog/vehicle (make-user-subentity-url user-id
-                                                                                             fpmeta/pathcomp-vehicles
-                                                                                             vehicle-id)))))
+                                                                                   fpmeta/pathcomp-vehicles
+                                                                                   vehicle-id)))))
                            conn
                            envlog
                            version
@@ -356,7 +364,8 @@
                            config/fp-base-url
                            config/fp-entity-uri-prefix
                            user-embedded-fn
-                           user-links-fn))
+                           user-links-fn
+                           config/fphdr-login-failed-reason))
   (ANY light-login-uri-template
        []
        (loginres/light-login-res config/db-spec
@@ -364,7 +373,19 @@
                                  config/fphdr-auth-token
                                  config/fphdr-error-mask
                                  config/fp-base-url
-                                 config/fp-entity-uri-prefix))
+                                 config/fp-entity-uri-prefix
+                                 config/fphdr-login-failed-reason))
+  (ANY logout-uri-template
+       [user-id]
+       (logoutres/logout-res config/db-spec
+                             config/fp-mt-subtype-prefix
+                             config/fphdr-auth-token
+                             config/fphdr-error-mask
+                             config/fp-auth-scheme
+                             config/fp-auth-scheme-param-name
+                             config/fp-base-url
+                             config/fp-entity-uri-prefix
+                             (Long. user-id)))
   (ANY user-uri-template
        [user-id]
        (userres/user-res config/db-spec
@@ -377,7 +398,9 @@
                          config/fp-entity-uri-prefix
                          (Long. user-id)
                          nil
-                         user-links-fn))
+                         user-links-fn
+                         config/fphdr-if-unmodified-since
+                         config/fphdr-delete-reason))
   #_(ANY changelog-uri-template
        [user-id]
        (letfn [(mt-fn-maker [mt-subtype-fn]
@@ -470,7 +493,8 @@
                            (Long. user-id)
                            (Long. vehicle-id)
                            nil
-                           nil))
+                           nil
+                           config/fphdr-if-unmodified-since))
   (ANY fuelstations-uri-template
        [user-id]
        (fssres/fuelstations-res config/db-spec
@@ -497,7 +521,8 @@
                               (Long. user-id)
                               (Long. fuelstation-id)
                               nil
-                              nil))
+                              nil
+                              config/fphdr-if-unmodified-since))
   (ANY envlogs-uri-template
        [user-id]
        (envlogsres/envlogs-res config/db-spec
@@ -524,7 +549,8 @@
                              (Long. user-id)
                              (Long. envlog-id)
                              nil
-                             nil))
+                             nil
+                             config/fphdr-if-unmodified-since))
   (ANY fplogs-uri-template
        [user-id]
        (fplogsres/fplogs-res config/db-spec
@@ -551,7 +577,8 @@
                            (Long. user-id)
                            (Long. fplog-id)
                            nil
-                           nil)))
+                           nil
+                           config/fphdr-if-unmodified-since)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Middleware-decorated app

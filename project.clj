@@ -19,13 +19,13 @@
                  [compojure "1.2.1"]
                  [liberator "0.12.2"]
                  [environ "1.0.0"]
-                 [pe-jdbc-utils "0.0.4"]
                  [pe-core-utils "0.0.11"]
-                 [pe-rest-utils "0.0.19"]
-                 [pe-user-core "0.1.15"]
-                 [pe-user-rest "0.0.23"]
-                 [pe-fp-core "0.0.13"]
-                 [pe-fp-rest "0.0.14"]]
+                 [pe-jdbc-utils "0.0.14"]
+                 [pe-rest-utils "0.0.24"]
+                 [pe-user-core "0.1.25"]
+                 [pe-user-rest "0.0.31"]
+                 [pe-fp-core "0.0.16"]
+                 [pe-fp-rest "0.0.16"]]
   :resource-paths ["resources"]
   :ring {:handler pe-fp-app.core/fp-app
          :init pe-fp-app.lifecycle/init
@@ -39,7 +39,7 @@
                          :fp-jdbc-subprotocol "postgresql"
                          :fp-base-url "http://localhost:4040"
                          :fp-nrepl-server-port 7888}
-                   :plugins [[cider/cider-nrepl "0.9.0-SNAPSHOT"]
+                   :plugins [[cider/cider-nrepl "0.10.0-SNAPSHOT"]
                              [lein-environ "1.0.0"]
                              [lein-ring "0.8.13"]]
                    :resource-paths ["test-resources"]
