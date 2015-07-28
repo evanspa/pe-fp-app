@@ -10,6 +10,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Environment-controlled database config
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def fp-app-version       (env :fp-app-version))
 (def fp-db-name           (env :fp-db-name))
 (def fp-db-server-host    (env :fp-db-server-host))
 (def fp-db-server-port    (env :fp-db-server-port))

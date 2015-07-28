@@ -84,7 +84,7 @@
 (defn init-database
   []
   ;; Database setup
-  (log/info "Proceeding to setup database")
+  (log/info (format "Proceeding to setup database (app version=[%s])" config/fp-app-version))
 
   ;; Create schema version table
   (j/db-do-commands config/db-spec true uddl/schema-version-ddl)
@@ -93,32 +93,32 @@
   (let [current-schema-version (usercore/get-schema-version config/db-spec)]
     (if (nil? current-schema-version)
       (let [do-upper-bound (inc target-schema-version)]
-        (log/info "Current schema version installed is nil.  Proceeding to apply DDL operations through target schema version: "
-                  target-schema-version)
+        (log/info (format "Current schema version installed is nil.  Proceeding to apply DDL operations through target schema version: [%d]"
+                          target-schema-version))
         (dotimes [version do-upper-bound]
           (let [ddl-fn (get ddl-operations version)]
-            (log/info "Proceeding to apply version " version " DDL updates.")
+            (log/info (format "Proceeding to apply version [%d] DDL updates." version))
             (ddl-fn))))
       (let [do-upper-bound (- target-schema-version current-schema-version)]
-        (log/info "Current schema version installed: "
-                  current-schema-version
-                  ".  Proceeding to apply DDL operations through target schema version: "
-                  target-schema-version
-                  ".")
+        (log/info (format "Current schema version installed: [%d].  Proceeding to apply DDL operations through target schema version: [%d]."
+                          current-schema-version
+                          target-schema-version))
         (dotimes [version do-upper-bound]
           (let [version-key (+ version (inc current-schema-version))
                 ddl-fn (get ddl-operations version-key)]
-            (log/info "Proceeding to apply version " version-key " DDL updates.")
-            (ddl-fn)))))
-    (usercore/set-schema-version config/db-spec target-schema-version)))
+            (log/info (format "Proceeding to apply version [%d] DDL updates." version-key))
+            (ddl-fn)
+            (log/info (format  "Version [%d] DDL updates applied." version-key))))))
+    (usercore/set-schema-version config/db-spec target-schema-version)
+    (log/info (format  "Schema version table updated to value: [%d]." target-schema-version))))
 
 (defn init []
-  (log/info "Proceeding to start FP App server.")
+  (log/info (format "Proceeding to start FP App server (version=[%s])." config/fp-app-version))
   (init-database)
   (log/info (format "Proceeding to start nrepl-server at port: [%s]" config/fp-nrepl-server-port))
   (defonce nrepl-server
     (nrepl/start-server :port (Integer/valueOf config/fp-nrepl-server-port))))
 
 (defn stop []
-  (log/info "Proceeding to stop FP App server.")
+  (log/info (format "Proceeding to stop FP App server (version=[%s])." config/fp-app-version))
   (nrepl/stop-server nrepl-server))

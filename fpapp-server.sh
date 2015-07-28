@@ -3,8 +3,9 @@
 ################################################################################
 # Locations
 ################################################################################
+readonly FPAPP_UBERJAR_VERSION="0.0.11"
 readonly FPAPP_UBERJARS_DIR="/Users/paulevans/Documents/GitHub-repos/pe-fp-app/target"
-readonly FPAPP_UBERJAR_NAME="pe-fp-app-0.0.5-standalone.jar"
+readonly FPAPP_UBERJAR_NAME="pe-fp-app-${FPAPP_UBERJAR_VERSION}-standalone.jar"
 
 ################################################################################
 # Config variables
@@ -34,6 +35,7 @@ readonly FP_NREPL_SERVER_PORT=7888
 ################################################################################
 # JVM property names
 ################################################################################
+readonly FP_APP_VERSION_LKUP_KEY="fp.app.version"
 readonly FP_DB_NAME_LKUP_KEY="fp.db.name"
 readonly FP_DB_SERVER_HOST_LKUP_KEY="fp.db.server.host"
 readonly FP_DB_SERVER_PORT_LKUP_KEY="fp.db.server.port"
@@ -49,6 +51,7 @@ mkdir -p $FPAPP_SERVER_LOGSDIR
 
 touch "$FPAPP_SERVER_OUT"
 java -D${FP_HYPERMEDIA_BASE_URL_LKUP_KEY}=${FP_HYPERMEDIA_BASE_URL} \
+-D${FP_APP_VERSION_LKUP_KEY}=${FPAPP_UBERJAR_VERSION} \
 -D${FP_DB_NAME_LKUP_KEY}=${FP_DB_NAME} \
 -D${FP_DB_SERVER_HOST_LKUP_KEY}=${FP_DB_SERVER_HOST} \
 -D${FP_DB_SERVER_PORT_LKUP_KEY}=${FP_DB_SERVER_PORT} \
