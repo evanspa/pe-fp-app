@@ -1,4 +1,4 @@
-(defproject pe-fp-app "0.0.9"
+(defproject pe-fp-app "0.0.10"
   :description "The fuel purchase application REST API endpoint."
   :url "https://github.com/evanspa/pe-fp-app"
   :license {:name "MIT"
