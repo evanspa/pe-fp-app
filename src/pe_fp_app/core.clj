@@ -150,6 +150,9 @@
                                              "/"
                                              path-comp)))]
     (-> {}
+        (rucore/assoc-link (link-fn usermeta/logout-relation
+                                    usermeta/mt-subtype-user
+                                    usermeta/pathcomp-logout))
         (rucore/assoc-link (link-fn fpmeta/fp-vehicles-relation
                                     fpmeta/mt-subtype-vehicle
                                     fpmeta/pathcomp-vehicles))
@@ -494,7 +497,8 @@
                            (Long. vehicle-id)
                            nil
                            nil
-                           config/fphdr-if-unmodified-since))
+                           config/fphdr-if-unmodified-since
+                           config/fphdr-if-modified-since))
   (ANY fuelstations-uri-template
        [user-id]
        (fssres/fuelstations-res config/db-spec
@@ -522,7 +526,8 @@
                               (Long. fuelstation-id)
                               nil
                               nil
-                              config/fphdr-if-unmodified-since))
+                              config/fphdr-if-unmodified-since
+                              config/fphdr-if-modified-since))
   (ANY envlogs-uri-template
        [user-id]
        (envlogsres/envlogs-res config/db-spec
@@ -550,7 +555,8 @@
                              (Long. envlog-id)
                              nil
                              nil
-                             config/fphdr-if-unmodified-since))
+                             config/fphdr-if-unmodified-since
+                             config/fphdr-if-modified-since))
   (ANY fplogs-uri-template
        [user-id]
        (fplogsres/fplogs-res config/db-spec
@@ -578,7 +584,8 @@
                            (Long. fplog-id)
                            nil
                            nil
-                           config/fphdr-if-unmodified-since)))
+                           config/fphdr-if-unmodified-since
+                           config/fphdr-if-modified-since)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Middleware-decorated app

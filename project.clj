@@ -21,11 +21,11 @@
                  [environ "1.0.0"]
                  [pe-core-utils "0.0.11"]
                  [pe-jdbc-utils "0.0.14"]
-                 [pe-rest-utils "0.0.24"]
+                 [pe-rest-utils "0.0.25"]
                  [pe-user-core "0.1.26"]
-                 [pe-user-rest "0.0.32"]
+                 [pe-user-rest "0.0.34"]
                  [pe-fp-core "0.0.17"]
-                 [pe-fp-rest "0.0.17"]]
+                 [pe-fp-rest "0.0.20"]]
   :resource-paths ["resources"]
   :ring {:handler pe-fp-app.core/fp-app
          :init pe-fp-app.lifecycle/init
