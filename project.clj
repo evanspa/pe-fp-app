@@ -1,4 +1,4 @@
-(defproject pe-fp-app "0.0.13"
+(defproject pe-fp-app "0.0.14"
   :description "The fuel purchase application REST API endpoint."
   :url "https://github.com/evanspa/pe-fp-app"
   :license {:name "MIT"
@@ -20,18 +20,18 @@
                  [liberator "0.12.2"]
                  [environ "1.0.0"]
                  [pe-core-utils "0.0.11"]
-                 [pe-jdbc-utils "0.0.14"]
-                 [pe-rest-utils "0.0.27"]
-                 [pe-user-core "0.1.26"]
-                 [pe-user-rest "0.0.35"]
-                 [pe-fp-core "0.0.17"]
-                 [pe-fp-rest "0.0.21"]]
+                 [pe-jdbc-utils "0.0.15"]
+                 [pe-rest-utils "0.0.28"]
+                 [pe-user-core "0.1.27"]
+                 [pe-user-rest "0.0.36"]
+                 [pe-fp-core "0.0.18"]
+                 [pe-fp-rest "0.0.22"]]
   :resource-paths ["resources"]
   :ring {:handler pe-fp-app.core/fp-app
          :init pe-fp-app.lifecycle/init
          :destroy pe-fp-app.lifecycle/stop}
   :profiles {:dev {:source-paths ["dev"]  ;ensures 'user.clj' gets auto-loaded
-                   :env {:fp-app-version "0.0.13"
+                   :env {:fp-app-version "0.0.14"
                          :fp-db-name "fp"
                          :fp-db-server-host "localhost"
                          :fp-db-server-port 5432

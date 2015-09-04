@@ -11,7 +11,7 @@
 
 (def nrepl-server)
 
-(def target-schema-version 3)
+(def target-schema-version 4)
 
 (def ddl-operations
   {0 (fn []
@@ -79,7 +79,12 @@
        (jcore/with-try-catch-exec-as-query config/db-spec
          (uddl/v1-create-suspended-count-inc-trigger-fn config/db-spec))
        (jcore/with-try-catch-exec-as-query config/db-spec
-         (uddl/v1-create-user-account-suspended-count-trigger-fn config/db-spec)))})
+         (uddl/v1-create-user-account-suspended-count-trigger-fn config/db-spec)))
+   4 (fn []
+       (j/db-do-commands config/db-spec
+                         true
+                         fpddl/v3-vehicle-drop-erroneous-unique-name-constraint-again
+                         fpddl/v3-vehicle-add-proper-unique-name-constraint-take-2))})
 
 (defn init-database
   []

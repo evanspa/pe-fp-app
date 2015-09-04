@@ -9,6 +9,8 @@
             [ring.middleware.params :refer [wrap-params]]
             [compojure.handler :as handler]
             [pe-fp-app.config :as config]
+            [pe-user-core.ddl :as userddl]
+            [pe-user-core.core :as usercore]
             [pe-user-rest.utils :as userresutils]
             [pe-user-rest.meta :as usermeta]
             [pe-user-rest.resource.users-res :as usersres]
@@ -19,22 +21,27 @@
             [pe-user-rest.resource.version.login-res-v001]
             [pe-user-rest.resource.logout-res :as logoutres]
             [pe-user-rest.resource.version.logout-res-v001]
+            [pe-fp-core.ddl :as fpddl]
             [pe-fp-rest.meta :as fpmeta]
             [pe-fp-rest.resource.vehicle.vehicles-res :as vehsres]
             [pe-fp-rest.resource.vehicle.version.vehicles-res-v001]
             [pe-fp-rest.resource.vehicle.vehicle-res :as vehres]
+            [pe-fp-rest.resource.vehicle.vehicle-utils :as vehresutils]
             [pe-fp-rest.resource.vehicle.version.vehicle-res-v001]
             [pe-fp-rest.resource.fuelstation.fuelstations-res :as fssres]
+            [pe-fp-rest.resource.fuelstation.fuelstation-utils :as fsresutils]
             [pe-fp-rest.resource.fuelstation.version.fuelstations-res-v001]
             [pe-fp-rest.resource.fuelstation.fuelstation-res :as fsres]
             [pe-fp-rest.resource.fuelstation.version.fuelstation-res-v001]
             [pe-fp-rest.resource.fplog.fplogs-res :as fplogsres]
             [pe-fp-rest.resource.fplog.version.fplogs-res-v001]
             [pe-fp-rest.resource.fplog.fplog-res :as fplogres]
+            [pe-fp-rest.resource.fplog.fplog-utils :as fplogresutils]
             [pe-fp-rest.resource.fplog.version.fplog-res-v001]
             [pe-fp-rest.resource.envlog.envlogs-res :as envlogsres]
             [pe-fp-rest.resource.envlog.version.envlogs-res-v001]
             [pe-fp-rest.resource.envlog.envlog-res :as envlogres]
+            [pe-fp-rest.resource.envlog.envlog-utils :as envlogresutils]
             [pe-fp-rest.resource.envlog.version.envlog-res-v001]
             [pe-fp-rest.meta :as meta]
             [pe-fp-core.core :as fpcore]
@@ -212,10 +219,7 @@
                            :fpvehicle/name
                            fpmeta/mt-subtype-vehicle
                            fpmeta/pathcomp-vehicles
-                           (fn [vehicle]
-                             (-> vehicle
-                                 (ucore/transform-map-val :fpvehicle/created-at #(c/to-long %))
-                                 (ucore/transform-map-val :fpvehicle/updated-at #(c/to-long %))))
+                           #(vehresutils/vehicle-out-transform %)
                            conn
                            vehicle
                            version
@@ -233,10 +237,7 @@
                            :fpfuelstation/name
                            fpmeta/mt-subtype-fuelstation
                            fpmeta/pathcomp-fuelstations
-                           (fn [fuelstation]
-                             (-> fuelstation
-                                 (ucore/transform-map-val :fpfuelstation/created-at #(c/to-long %))
-                                 (ucore/transform-map-val :fpfuelstation/updated-at #(c/to-long %))))
+                           #(fsresutils/fuelstation-out-transform %)
                            conn
                            fuelstation
                            version
@@ -254,19 +255,9 @@
                            :fplog/purchased-at
                            fpmeta/mt-subtype-fplog
                            fpmeta/pathcomp-fuelpurchase-logs
-                           (fn [fplog]
-                             (let [vehicle-id (:fplog/vehicle-id fplog)
-                                   fuelstation-id (:fplog/fuelstation-id fplog)]
-                               (-> fplog
-                                   (ucore/transform-map-val :fplog/created-at #(c/to-long %))
-                                   (ucore/transform-map-val :fplog/updated-at #(c/to-long %))
-                                   (ucore/transform-map-val :fplog/purchased-at #(c/to-long %))
-                                   (assoc :fplog/vehicle (make-user-subentity-url user-id
-                                                                                  fpmeta/pathcomp-vehicles
-                                                                                  vehicle-id))
-                                   (assoc :fplog/fuelstation (make-user-subentity-url user-id
-                                                                                      fpmeta/pathcomp-fuelstations
-                                                                                      fuelstation-id)))))
+                           #(fplogresutils/fplog-out-transform %
+                                                               config/fp-base-url
+                                                               config/fp-entity-uri-prefix)
                            conn
                            fplog
                            version
@@ -284,36 +275,27 @@
                            :fpenvironmentlog/log-date
                            fpmeta/mt-subtype-envlog
                            fpmeta/pathcomp-environment-logs
-                           (fn [envlog]
-                             (let [vehicle-id (:envlog/vehicle-id envlog)]
-                               (-> envlog
-                                   (ucore/transform-map-val :envlog/created-at #(c/to-long %))
-                                   (ucore/transform-map-val :envlog/updated-at #(c/to-long %))
-                                   (ucore/transform-map-val :envlog/logged-at #(c/to-long %))
-                                   (assoc :envlog/vehicle (make-user-subentity-url user-id
-                                                                                   fpmeta/pathcomp-vehicles
-                                                                                   vehicle-id)))))
+                           #(envlogresutils/envlog-out-transform %
+                                                                 config/fp-base-url
+                                                                 config/fp-entity-uri-prefix)
                            conn
                            envlog
                            version
                            format-ind))
 
-(defn user-embedded-fn
+(defn fp-entities->vec
   [version
-   base-url
-   entity-uri-prefix
-   entity-uri
-   conn
+   db-spec
    accept-format-ind
-   user-id]
-  (let [vehicles (fpcore/vehicles-for-user conn user-id)
-        fuelstations (fpcore/fuelstations-for-user conn user-id)
-        fplogs (fpcore/fplogs-for-user conn user-id)
-        envlogs (fpcore/envlogs-for-user conn user-id)]
-    (vec (concat (map (fn [[veh-id vehicle]]
+   user-id
+   vehicles
+   fuelstations
+   fplogs
+   envlogs]
+  (vec (concat (map (fn [[veh-id vehicle]]
                         (embedded-vehicle user-id
                                           veh-id
-                                          conn
+                                          db-spec
                                           vehicle
                                           version
                                           accept-format-ind))
@@ -321,7 +303,7 @@
                  (map (fn [[fuelstation-id fuelstation]]
                         (embedded-fuelstation user-id
                                               fuelstation-id
-                                              conn
+                                              db-spec
                                               fuelstation
                                               version
                                               accept-format-ind))
@@ -329,7 +311,7 @@
                  (map (fn [[fplog-id fplog]]
                         (embedded-fplog user-id
                                         fplog-id
-                                        conn
+                                        db-spec
                                         fplog
                                         version
                                         accept-format-ind))
@@ -337,11 +319,70 @@
                  (map (fn [[envlog-id envlog]]
                         (embedded-envlog user-id
                                          envlog-id
-                                         conn
+                                         db-spec
                                          envlog
                                          version
                                          accept-format-ind))
-                      envlogs)))))
+                      envlogs))))
+
+(defn user-embedded-fn
+  [version
+   base-url
+   entity-uri-prefix
+   entity-uri
+   db-spec
+   accept-format-ind
+   user-id]
+  (let [vehicles (fpcore/vehicles-for-user db-spec user-id)
+        fuelstations (fpcore/fuelstations-for-user db-spec user-id)
+        fplogs (fpcore/fplogs-for-user db-spec user-id)
+        envlogs (fpcore/envlogs-for-user db-spec user-id)]
+    (fp-entities->vec version
+                      db-spec
+                      accept-format-ind
+                      user-id
+                      vehicles
+                      fuelstations
+                      fplogs
+                      envlogs)))
+
+(defn changelog-embedded-fn
+  [version
+   base-url
+   entity-uri-prefix
+   entity-uri
+   db-spec
+   accept-format-ind
+   user-id
+   modified-since]
+  (let [user-result (usercore/load-user-by-id-if-modified-since db-spec user-id modified-since)
+        {vehicles :entities} (fpcore/vehicles-modified-since db-spec user-id modified-since)
+        {fuelstations :entities} (fpcore/fuelstations-modified-since db-spec user-id modified-since)
+        {fplogs :entities} (fpcore/fplogs-modified-since db-spec user-id modified-since)
+        {envlogs :entities} (fpcore/envlogs-modified-since db-spec user-id modified-since)
+        fp-embedded-entities (fp-entities->vec version
+                                               db-spec
+                                               accept-format-ind
+                                               user-id
+                                               vehicles
+                                               fuelstations
+                                               fplogs
+                                               envlogs)]
+    (if (not (nil? user-result))
+      (let [[_ user] user-result]
+        (conj
+         fp-embedded-entities
+         {:media-type (rucore/media-type rumeta/mt-type
+                                         (usermeta/mt-subtype-user config/fp-mt-subtype-prefix)
+                                         version
+                                         accept-format-ind)
+          :location (rucore/make-abs-link-href config/fp-base-url
+                                               (str config/fp-entity-uri-prefix
+                                                    usermeta/pathcomp-users
+                                                    "/"
+                                                    user-id))
+          :payload (userresutils/user-out-transform user)}))
+      fp-embedded-entities)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The routes
@@ -350,14 +391,14 @@
   (ANY users-uri-template
        []
        (usersres/users-res config/db-spec
-                          config/fp-mt-subtype-prefix
-                          config/fphdr-auth-token
-                          config/fphdr-error-mask
-                          config/fp-base-url
-                          config/fp-entity-uri-prefix
-                          config/fphdr-establish-session
-                          nil
-                          user-links-fn))
+                           config/fp-mt-subtype-prefix
+                           config/fphdr-auth-token
+                           config/fphdr-error-mask
+                           config/fp-base-url
+                           config/fp-entity-uri-prefix
+                           config/fphdr-establish-session
+                           nil
+                           user-links-fn))
   (ANY login-uri-template
        []
        (loginres/login-res config/db-spec
@@ -403,73 +444,46 @@
                          nil
                          user-links-fn
                          config/fphdr-if-unmodified-since
+                         config/fphdr-if-modified-since
                          config/fphdr-delete-reason))
-  #_(ANY changelog-uri-template
+
+  (ANY changelog-uri-template
        [user-id]
-       (letfn [(mt-fn-maker [mt-subtype-fn]
-                 (fn [version accept-format-ind]
-                   (rucore/media-type rumeta/mt-type
-                                      (mt-subtype-fn config/fp-mt-subtype-prefix)
-                                      version
-                                      accept-format-ind)))
-               (loc-fn-maker [pathcomp]
-                 (fn [id]
-                   (make-user-subentity-url user-id pathcomp id)))]
-         (let [user-id-l (Long. user-id)]
+       (let [user-id-l (Long. user-id)]
+         (letfn [(mt-fn-maker [mt-subtype-fn]
+                   (fn [version accept-format-ind]
+                     (rucore/media-type rumeta/mt-type
+                                        (mt-subtype-fn config/fp-mt-subtype-prefix)
+                                        version
+                                        accept-format-ind)))
+                 (loc-fn-maker [pathcomp]
+                   (fn [id]
+                     (make-user-subentity-url user-id pathcomp id)))]
            (clres/changelog-res config/db-spec
                                 config/fp-mt-subtype-prefix
                                 config/fphdr-auth-token
                                 config/fphdr-error-mask
+                                config/fp-auth-scheme
+                                config/fp-auth-scheme-param-name
                                 config/fp-base-url
                                 config/fp-entity-uri-prefix
+                                user-id-l
+                                changelog-embedded-fn
+                                nil
+                                config/fphdr-if-modified-since
                                 (fn [ctx] (userresutils/authorized? ctx
                                                                     config/db-spec
                                                                     user-id-l
                                                                     config/fp-auth-scheme
                                                                     config/fp-auth-scheme-param-name))
-                                user-id-l
-                                [[user-id-l
-                                  :user/hashed-password
-                                  (mt-fn-maker usermeta/mt-subtype-user)
-                                  (fn [user-id] (rucore/make-abs-link-href config/fp-base-url
-                                                                              (str config/fp-entity-uri-prefix
-                                                                                   usermeta/pathcomp-users
-                                                                                   "/"
-                                                                                   user-id)))
-                                  user-links-fn
-                                  [:user/auth-token
-                                   :user/hashed-password
-                                   :user/password]]
-                                 [:fpvehicle/user
-                                  user-id-l
-                                  (mt-fn-maker fpmeta/mt-subtype-vehicle)
-                                  (loc-fn-maker fpmeta/pathcomp-vehicles)
-                                  nil
-                                  [:fpvehicle/user]]
-                                 [:fpfuelstation/user
-                                  user-id-l
-                                  (mt-fn-maker fpmeta/mt-subtype-fuelstation)
-                                  (loc-fn-maker fpmeta/pathcomp-fuelstations)
-                                  nil
-                                  [:fpfuelstation/user]]
-                                 [:fplog/user
-                                  user-id-l
-                                  (mt-fn-maker fpmeta/mt-subtype-fplog)
-                                  (loc-fn-maker fpmeta/pathcomp-fuelpurchase-logs)
-                                  nil
-                                  [:fplog/user]]
-                                 [:envlog/user
-                                  user-id-l
-                                  (mt-fn-maker fpmeta/mt-subtype-envlog)
-                                  (loc-fn-maker fpmeta/pathcomp-environment-logs)
-                                  nil
-                                  [:envlog/user]]]
-                                fpapptxn/fpapptxn-changelog-fetch
-                                fpapptxn/fpapptxnlog-fetchclsince-remote-proc-started
-                                fpapptxn/fpapptxnlog-fetchclsince-remote-proc-done-success
-                                fpapptxn/fpapptxnlog-fetchclsince-remote-proc-done-err-occurred
-                                apptxnres/apptxn-async-logger
-                                apptxnres/make-apptxn))))
+                                userresutils/get-plaintext-auth-token
+                                [[userddl/tbl-user-account "id" "=" user-id-l "updated_at" "deleted_at"]
+                                 [fpddl/tbl-vehicle "user_id" "=" user-id-l "updated_at" "deleted_at"]
+                                 [fpddl/tbl-fuelstation "user_id" "=" user-id-l "updated_at" "deleted_at"]
+                                 [fpddl/tbl-fplog "user_id" "=" user-id-l "updated_at" "deleted_at"]
+                                 [fpddl/tbl-envlog "user_id" "=" user-id-l "updated_at" "deleted_at"]]))))
+
+
   (ANY vehicles-uri-template
        [user-id]
        (vehsres/vehicles-res config/db-spec
