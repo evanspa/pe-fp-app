@@ -5,6 +5,7 @@
             [clojure.repl :refer :all]
             [clojure.stacktrace :refer (e)]
             [clj-time.core :as t]
+            [clj-time.coerce :as c]
             [clojure.test :as test]
             [clojure.java.io :refer [resource]]
             [ring.server.standalone :refer (serve)]
@@ -16,7 +17,8 @@
             [clojure.tools.logging :as log]
             [environ.core :refer [env]]
             [pe-jdbc-utils.core :as jcore]
-            [clojure.tools.namespace.repl :refer (refresh refresh-all)]))
+            [clojure.tools.namespace.repl :refer (refresh refresh-all)]
+            [pe-rest-utils.core :refer [*retry-after*]]))
 
 (def server (atom nil))
 
@@ -44,3 +46,15 @@
        (println "Proceeding to stop server")
        (.stop @server))
      (refresh-all :after go-fn-name))))
+
+(defn busy []
+  (alter-var-root (var *retry-after*) (fn [_] (t/now))))
+
+(defn not-busy []
+  (alter-var-root (var *retry-after*) (fn [_] nil)))
+
+(defn start []
+  (.start @server))
+
+(defn stop []
+  (.stop @server))

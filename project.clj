@@ -1,4 +1,4 @@
-(defproject pe-fp-app "0.0.14"
+(defproject pe-fp-app "0.0.15"
   :description "The fuel purchase application REST API endpoint."
   :url "https://github.com/evanspa/pe-fp-app"
   :license {:name "MIT"
@@ -20,18 +20,18 @@
                  [liberator "0.12.2"]
                  [environ "1.0.0"]
                  [pe-core-utils "0.0.11"]
-                 [pe-jdbc-utils "0.0.15"]
-                 [pe-rest-utils "0.0.28"]
-                 [pe-user-core "0.1.27"]
-                 [pe-user-rest "0.0.36"]
-                 [pe-fp-core "0.0.18"]
-                 [pe-fp-rest "0.0.22"]]
+                 [pe-jdbc-utils "0.0.16"]
+                 [pe-rest-utils "0.0.30"]
+                 [pe-user-core "0.1.28"]
+                 [pe-user-rest "0.0.37"]
+                 [pe-fp-core "0.0.19"]
+                 [pe-fp-rest "0.0.23"]]
   :resource-paths ["resources"]
   :ring {:handler pe-fp-app.core/fp-app
          :init pe-fp-app.lifecycle/init
          :destroy pe-fp-app.lifecycle/stop}
   :profiles {:dev {:source-paths ["dev"]  ;ensures 'user.clj' gets auto-loaded
-                   :env {:fp-app-version "0.0.14"
+                   :env {:fp-app-version "0.0.15"
                          :fp-db-name "fp"
                          :fp-db-server-host "localhost"
                          :fp-db-server-port 5432
@@ -47,7 +47,7 @@
                    :dependencies [[org.clojure/tools.namespace "0.2.7"]
                                   [org.clojure/java.classpath "0.2.2"]
                                   [org.clojure/tools.nrepl "0.2.7"]
-                                  [pe-rest-testutils "0.0.5"]
+                                  [pe-rest-testutils "0.0.7"]
                                   [ring-mock "0.1.5"]]}}
   :jvm-opts ["-Xmx1g" "-DFPAPP_LOGS_DIR=logs"]
   :repositories [["releases" {:url "https://clojars.org/repo"
