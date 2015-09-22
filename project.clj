@@ -1,4 +1,4 @@
-(defproject pe-fp-app "0.0.16"
+(defproject pe-fp-app "0.0.17"
   :description "The fuel purchase application REST API endpoint."
   :url "https://github.com/evanspa/pe-fp-app"
   :license {:name "MIT"
@@ -19,6 +19,8 @@
                  [compojure "1.2.1"]
                  [liberator "0.12.2"]
                  [environ "1.0.0"]
+                 [clojurewerkz/mailer "1.2.0"]
+                 [javax.mail/mail "1.4.7"]
                  [pe-core-utils "0.0.11"]
                  [pe-jdbc-utils "0.0.16"]
                  [pe-rest-utils "0.0.30"]
@@ -31,7 +33,7 @@
          :init pe-fp-app.lifecycle/init
          :destroy pe-fp-app.lifecycle/stop}
   :profiles {:dev {:source-paths ["dev"]  ;ensures 'user.clj' gets auto-loaded
-                   :env {:fp-app-version "0.0.16"
+                   :env {:fp-app-version "0.0.17"
                          :fp-db-name "fp"
                          :fp-db-server-host "localhost"
                          :fp-db-server-port 5432
@@ -39,6 +41,7 @@
                          :fp-jdbc-driver-class "org.postgresql.Driver"
                          :fp-jdbc-subprotocol "postgresql"
                          :fp-base-url "http://localhost:4040"
+                         :fp-smtp-host "localhost"
                          :fp-nrepl-server-port 7888}
                    :plugins [[cider/cider-nrepl "0.10.0-SNAPSHOT"]
                              [lein-environ "1.0.0"]

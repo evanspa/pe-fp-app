@@ -17,7 +17,10 @@
             [pe-rest-utils.core :as rucore]
             [pe-rest-utils.changelog.meta :as clmeta]
             [pe-fp-rest.meta :as fpmeta]
-            [pe-rest-utils.meta :as rumeta]))
+            [pe-rest-utils.meta :as rumeta]
+            [clojurewerkz.mailer.core :refer [delivery-mode!]]))
+
+(alter-var-root (var usercore/*smtp-server-host*) (fn [_] nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Fixtures

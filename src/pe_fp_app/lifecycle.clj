@@ -11,7 +11,7 @@
 
 (def nrepl-server)
 
-(def target-schema-version 4)
+(def target-schema-version 5)
 
 (def ddl-operations
   {0 (fn []
@@ -84,7 +84,11 @@
        (j/db-do-commands config/db-spec
                          true
                          fpddl/v3-vehicle-drop-erroneous-unique-name-constraint-again
-                         fpddl/v3-vehicle-add-proper-unique-name-constraint-take-2))})
+                         fpddl/v3-vehicle-add-proper-unique-name-constraint-take-2))
+   5 (fn []
+       (j/db-do-commands config/db-spec
+                         true
+                         uddl/v2-create-email-verification-token-ddl))})
 
 (defn init-database
   []

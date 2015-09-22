@@ -398,7 +398,12 @@
                            config/fp-entity-uri-prefix
                            config/fphdr-establish-session
                            nil
-                           user-links-fn))
+                           user-links-fn
+                           config/fp-verification-email-mustache-template
+                           config/fp-verification-email-subject-line
+                           config/fp-verification-email-from
+                           config/fp-verification-url-maker
+                           config/fp-flagged-url-maker))
   (ANY login-uri-template
        []
        (loginres/login-res config/db-spec
