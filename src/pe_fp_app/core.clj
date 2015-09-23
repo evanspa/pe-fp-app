@@ -21,6 +21,7 @@
             [pe-user-rest.resource.version.login-res-v001]
             [pe-user-rest.resource.logout-res :as logoutres]
             [pe-user-rest.resource.version.logout-res-v001]
+            [pe-user-rest.resource.account-verification-res :as verificationres]
             [pe-fp-core.ddl :as fpddl]
             [pe-fp-rest.meta :as fpmeta]
             [pe-fp-rest.resource.vehicle.vehicles-res :as vehsres]
@@ -60,6 +61,12 @@
   (format "%s%s"
           config/fp-entity-uri-prefix
           usermeta/pathcomp-users))
+
+(def verification-uri-template
+  (format "%s%s/:user-id/%s/:verification-token"
+          config/fp-entity-uri-prefix
+          usermeta/pathcomp-users
+          usermeta/pathcomp-verification))
 
 (def login-uri-template
   (format "%s%s"
@@ -404,6 +411,14 @@
                            config/fp-verification-email-from
                            config/fp-verification-url-maker
                            config/fp-flagged-url-maker))
+  (ANY verification-uri-template
+       [user-id
+        verification-token]
+       (verificationres/account-verification-res config/db-spec
+                                                 config/fp-base-url
+                                                 config/fp-entity-uri-prefix
+                                                 (Long. user-id)
+                                                 verification-token))
   (ANY login-uri-template
        []
        (loginres/login-res config/db-spec
