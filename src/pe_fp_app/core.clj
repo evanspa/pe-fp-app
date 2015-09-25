@@ -418,7 +418,9 @@
                                                  config/fp-base-url
                                                  config/fp-entity-uri-prefix
                                                  (Long. user-id)
-                                                 verification-token))
+                                                 verification-token
+                                                 config/fp-verified-mustache-template
+                                                 config/fp-error-mustache-template))
   (ANY login-uri-template
        []
        (loginres/login-res config/db-spec

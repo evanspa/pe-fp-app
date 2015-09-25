@@ -58,9 +58,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def fp-smtp-host (env :fp-smtp-host))
 (alter-var-root (var usercore/*smtp-server-host*) (fn [_] fp-smtp-host))
-(def fp-verification-email-mustache-template "email/templates/welcome-and-verify.html.mustache")
 (def fp-verification-email-subject-line "Welcome to Gas Jot! (please verify your account)")
 (def fp-verification-email-from "Gas Jot <support@jotyourself.com>")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Mustache templates
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def fp-verification-email-mustache-template "email/templates/welcome-and-verify.html.mustache")
+(def fp-verified-mustache-template "web/templates/account-verified.html.mustache")
+(def fp-error-mustache-template "web/templates/error.html.mustache")
 
 (defn fp-verification-url-maker
   [user-id verification-token]
