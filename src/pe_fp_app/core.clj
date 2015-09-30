@@ -21,6 +21,8 @@
             [pe-user-rest.resource.version.login-res-v001]
             [pe-user-rest.resource.logout-res :as logoutres]
             [pe-user-rest.resource.version.logout-res-v001]
+            [pe-user-rest.resource.send-verification-email-res :as sendveriemailres]
+            [pe-user-rest.resource.version.send-verification-email-res-v001]
             [pe-user-rest.resource.account-verification-res :as verificationres]
             [pe-fp-core.ddl :as fpddl]
             [pe-fp-rest.meta :as fpmeta]
@@ -83,6 +85,12 @@
           config/fp-entity-uri-prefix
           usermeta/pathcomp-users
           usermeta/pathcomp-logout))
+
+(def send-verification-email-uri-template
+  (format "%s%s/:user-id/%s"
+          config/fp-entity-uri-prefix
+          usermeta/pathcomp-users
+          usermeta/pathcomp-send-verification-email))
 
 (def user-uri-template
   (format "%s%s/:user-id"
@@ -167,6 +175,9 @@
         (rucore/assoc-link (link-fn usermeta/logout-relation
                                     usermeta/mt-subtype-user
                                     usermeta/pathcomp-logout))
+        (rucore/assoc-link (link-fn usermeta/send-verification-email-relation
+                                    usermeta/mt-subtype-user
+                                    usermeta/pathcomp-send-verification-email))
         (rucore/assoc-link (link-fn fpmeta/fp-vehicles-relation
                                     fpmeta/mt-subtype-vehicle
                                     fpmeta/pathcomp-vehicles))
@@ -452,6 +463,22 @@
                              config/fp-base-url
                              config/fp-entity-uri-prefix
                              (Long. user-id)))
+  (ANY send-verification-email-uri-template
+       [user-id]
+       (sendveriemailres/send-verification-email-res config/db-spec
+                                                     config/fp-mt-subtype-prefix
+                                                     config/fphdr-auth-token
+                                                     config/fphdr-error-mask
+                                                     config/fp-auth-scheme
+                                                     config/fp-auth-scheme-param-name
+                                                     config/fp-base-url
+                                                     config/fp-entity-uri-prefix
+                                                     (Long. user-id)
+                                                     config/fp-verification-email-mustache-template
+                                                     config/fp-verification-email-subject-line
+                                                     config/fp-verification-email-from
+                                                     config/fp-verification-url-maker
+                                                     config/fp-flagged-url-maker))
   (ANY user-uri-template
        [user-id]
        (userres/user-res config/db-spec
