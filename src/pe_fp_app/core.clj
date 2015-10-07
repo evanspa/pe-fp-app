@@ -69,7 +69,7 @@
           usermeta/pathcomp-users))
 
 (def verification-uri-template
-  (format "%s%s/:user-id/%s/:verification-token"
+  (format "%s%s/:email/%s/:verification-token"
           config/fp-entity-uri-prefix
           usermeta/pathcomp-users
           usermeta/pathcomp-verification))
@@ -102,13 +102,13 @@
           usermeta/pathcomp-send-password-reset-email))
 
 (def prepare-password-reset-uri-template
-  (format "%s%s/:user-id/%s/:password-reset-token"
+  (format "%s%s/:email/%s/:password-reset-token"
           config/fp-entity-uri-prefix
           usermeta/pathcomp-users
           usermeta/pathcomp-prepare-password-reset))
 
 (def password-reset-uri-template
-  (format "%s%s/:user-id/%s/:password-reset-token"
+  (format "%s%s/:email/%s/:password-reset-token"
           config/fp-entity-uri-prefix
           usermeta/pathcomp-users
           usermeta/pathcomp-password-reset))
