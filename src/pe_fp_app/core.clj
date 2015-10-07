@@ -441,8 +441,8 @@
                            config/fphdr-establish-session
                            nil
                            user-links-fn
-                           config/fp-verification-email-mustache-template
-                           config/fp-verification-email-subject-line
+                           config/fp-welcome-and-verification-email-mustache-template
+                           config/fp-welcome-and-verification-email-subject-line
                            config/fp-support-email-address
                            config/fp-verification-url-maker
                            config/fp-verification-flagged-url-maker))
@@ -454,8 +454,8 @@
                                                  config/fp-entity-uri-prefix
                                                  (Long. user-id)
                                                  verification-token
-                                                 config/fp-verified-mustache-template
-                                                 config/fp-error-mustache-template))
+                                                 config/fp-verification-success-mustache-template
+                                                 config/fp-verification-error-mustache-template))
   (ANY login-uri-template
        []
        (loginres/login-res config/db-spec

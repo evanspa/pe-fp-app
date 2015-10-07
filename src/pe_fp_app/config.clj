@@ -1,5 +1,6 @@
 (ns pe-fp-app.config
   (:require [environ.core :refer [env]]
+            [ring.util.codec :refer [url-encode]]
             [pe-user-core.core :as usercore]
             [pe-user-rest.meta :as usermeta]
             [clojurewerkz.mailer.core :refer [delivery-mode!]]))
@@ -59,68 +60,75 @@
 (def fp-smtp-host (env :fp-smtp-host))
 (alter-var-root (var usercore/*smtp-server-host*) (fn [_] fp-smtp-host))
 (def fp-support-email-address "Gas Jot <support@jotyourself.com>")
-(def fp-verification-email-subject-line "Welcome to Gas Jot! (please verify your account)")
 (delivery-mode! :smtp)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Mustache templates
+;; Account verification related
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(def fp-verification-email-mustache-template "email/templates/welcome-and-verify.html.mustache")
-(def fp-verified-mustache-template "web/templates/account-verified.html.mustache")
-(def fp-error-mustache-template "web/templates/error.html.mustache")
-(def fp-password-reset-email-subject-line "Gas Jot [password reset]")
-(def fp-password-reset-email-mustache-template "email/templates/password-reset.html.mustache")
-(def fp-password-reset-form-mustache-template "web/templates/password-reset-form.html.mustache")
-(def fp-password-reset-success-mustache-template "web/templates/password-reset-success.html.mustache")
-(def fp-password-reset-error-mustache-template "web/templates/password-reset-error.html.mustache")
-
+(def fp-welcome-and-verification-email-mustache-template "email/templates/welcome-and-account-verification.html.mustache")
+(def fp-verification-email-mustache-template             "email/templates/account-verification.html.mustache")
+(def fp-welcome-and-verification-email-subject-line "Welcome to Gas Jot! [please verify your account]")
+(def fp-verification-email-subject-line "Gas Jot [account verification]")
 (defn fp-verification-url-maker
-  [user-id verification-token]
-  (str fp-base-url
-       fp-entity-uri-prefix
-       usermeta/pathcomp-users
-       "/"
-       user-id
-       "/"
-       usermeta/pathcomp-verification
-       "/"
-       verification-token))
+  [email verification-token]
+  (url-encode (str fp-base-url
+                   fp-entity-uri-prefix
+                   usermeta/pathcomp-users
+                   "/"
+                   email
+                   "/"
+                   usermeta/pathcomp-verification
+                   "/"
+                   verification-token)))
 
 (defn fp-verification-flagged-url-maker
-  [user-id verification-token]
-  (str fp-base-url
-       fp-entity-uri-prefix
-       usermeta/pathcomp-users
-       "/"
-       user-id
-       "/"
-       usermeta/pathcomp-verification-flagged
-       "/"
-       verification-token))
+  [email verification-token]
+  (url-encode (str fp-base-url
+                   fp-entity-uri-prefix
+                   usermeta/pathcomp-users
+                   "/"
+                   email
+                   "/"
+                   usermeta/pathcomp-verification-flagged
+                   "/"
+                   verification-token)))
+
+(def fp-verification-success-mustache-template "web/templates/verification-success.html.mustache")
+(def fp-verification-error-mustache-template   "web/templates/verification-error.html.mustache")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Password reset related
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def fp-password-reset-email-subject-line "Gas Jot [password reset]")
+(def fp-password-reset-email-mustache-template "email/templates/password-reset.html.mustache")
 
 (defn fp-password-reset-url-maker
-  [user-id password-reset-token]
-  (str fp-base-url
-       fp-entity-uri-prefix
-       usermeta/pathcomp-users
-       "/"
-       user-id
-       "/"
-       usermeta/pathcomp-password-reset
-       "/"
-       password-reset-token))
+  [email password-reset-token]
+  (url-encode (str fp-base-url
+                   fp-entity-uri-prefix
+                   usermeta/pathcomp-users
+                   "/"
+                   email
+                   "/"
+                   usermeta/pathcomp-password-reset
+                   "/"
+                   password-reset-token)))
 
 (defn fp-password-reset-flagged-url-maker
-  [user-id password-reset-token]
-  (str fp-base-url
-       fp-entity-uri-prefix
-       usermeta/pathcomp-users
-       "/"
-       user-id
-       "/"
-       usermeta/pathcomp-password-reset-flagged
-       "/"
-       password-reset-token))
+  [email password-reset-token]
+  (url-encode (str fp-base-url
+                   fp-entity-uri-prefix
+                   usermeta/pathcomp-users
+                   "/"
+                   email
+                   "/"
+                   usermeta/pathcomp-password-reset-flagged
+                   "/"
+                   password-reset-token)))
+
+(def fp-password-reset-form-mustache-template    "web/templates/password-reset-form.html.mustache")
+(def fp-password-reset-success-mustache-template "web/templates/password-reset-success.html.mustache")
+(def fp-password-reset-error-mustache-template   "web/templates/password-reset-error.html.mustache")
 
 (defn db-spec-fn
   ([]
