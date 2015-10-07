@@ -3,6 +3,7 @@
             [liberator.dev :refer [wrap-trace]]
             [clj-time.core :as t]
             [clj-time.coerce :as c]
+            [ring.util.codec :refer [url-decode]]
             [clojure.tools.logging :as log]
             [compojure.core :refer [defroutes ANY]]
             [ring.middleware.cookies :refer [wrap-cookies]]
@@ -521,7 +522,7 @@
        (preparepwdresetres/prepare-password-reset-res config/db-spec
                                                       config/fp-base-url
                                                       config/fp-entity-uri-prefix
-                                                      email
+                                                      (url-decode email)
                                                       password-reset-token
                                                       config/fp-password-reset-form-mustache-template
                                                       (config/fp-password-reset-form-action-maker email password-reset-token)
@@ -532,7 +533,7 @@
        (pwdresetres/password-reset-res config/db-spec
                                        config/fp-base-url
                                        config/fp-entity-uri-prefix
-                                       email
+                                       (url-decode email)
                                        password-reset-token
                                        config/fp-password-reset-success-mustache-template
                                        config/fp-password-reset-error-mustache-template))
