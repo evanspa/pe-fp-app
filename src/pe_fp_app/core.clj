@@ -513,25 +513,26 @@
                                                            config/fp-password-reset-email-mustache-template
                                                            config/fp-password-reset-email-subject-line
                                                            config/fp-support-email-address
-                                                           config/fp-password-reset-url-maker
+                                                           config/fp-prepare-password-reset-url-maker
                                                            config/fp-password-reset-flagged-url-maker))
   (ANY prepare-password-reset-uri-template
-       [user-id
+       [email
         password-reset-token]
        (preparepwdresetres/prepare-password-reset-res config/db-spec
                                                       config/fp-base-url
                                                       config/fp-entity-uri-prefix
-                                                      user-id
+                                                      email
                                                       password-reset-token
                                                       config/fp-password-reset-form-mustache-template
+                                                      (config/fp-password-reset-form-action-maker email password-reset-token)
                                                       config/fp-password-reset-error-mustache-template))
   (ANY password-reset-uri-template
-       [user-id
+       [email
         password-reset-token]
        (pwdresetres/password-reset-res config/db-spec
                                        config/fp-base-url
                                        config/fp-entity-uri-prefix
-                                       user-id
+                                       email
                                        password-reset-token
                                        config/fp-password-reset-success-mustache-template
                                        config/fp-password-reset-error-mustache-template))

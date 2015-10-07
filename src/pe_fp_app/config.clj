@@ -71,27 +71,27 @@
 (def fp-verification-email-subject-line "Gas Jot [account verification]")
 (defn fp-verification-url-maker
   [email verification-token]
-  (url-encode (str fp-base-url
-                   fp-entity-uri-prefix
-                   usermeta/pathcomp-users
-                   "/"
-                   email
-                   "/"
-                   usermeta/pathcomp-verification
-                   "/"
-                   verification-token)))
+  (str fp-base-url
+       fp-entity-uri-prefix
+       usermeta/pathcomp-users
+       "/"
+       (url-encode email)
+       "/"
+       usermeta/pathcomp-verification
+       "/"
+       verification-token))
 
 (defn fp-verification-flagged-url-maker
   [email verification-token]
-  (url-encode (str fp-base-url
-                   fp-entity-uri-prefix
-                   usermeta/pathcomp-users
-                   "/"
-                   email
-                   "/"
-                   usermeta/pathcomp-verification-flagged
-                   "/"
-                   verification-token)))
+  (str fp-base-url
+       fp-entity-uri-prefix
+       usermeta/pathcomp-users
+       "/"
+       (url-encode email)
+       "/"
+       usermeta/pathcomp-verification-flagged
+       "/"
+       verification-token))
 
 (def fp-verification-success-mustache-template "web/templates/verification-success.html.mustache")
 (def fp-verification-error-mustache-template   "web/templates/verification-error.html.mustache")
@@ -102,29 +102,40 @@
 (def fp-password-reset-email-subject-line "Gas Jot [password reset]")
 (def fp-password-reset-email-mustache-template "email/templates/password-reset.html.mustache")
 
-(defn fp-password-reset-url-maker
+(defn fp-prepare-password-reset-url-maker
   [email password-reset-token]
-  (url-encode (str fp-base-url
-                   fp-entity-uri-prefix
-                   usermeta/pathcomp-users
-                   "/"
-                   email
-                   "/"
-                   usermeta/pathcomp-password-reset
-                   "/"
-                   password-reset-token)))
+  (str fp-base-url
+       fp-entity-uri-prefix
+       usermeta/pathcomp-users
+       "/"
+       (url-encode email)
+       "/"
+       usermeta/pathcomp-prepare-password-reset
+       "/"
+       password-reset-token))
+
+(defn fp-password-reset-form-action-maker
+  [email password-reset-token]
+  (str fp-entity-uri-prefix
+       usermeta/pathcomp-users
+       "/"
+       (url-encode email)
+       "/"
+       usermeta/pathcomp-password-reset
+       "/"
+       password-reset-token))
 
 (defn fp-password-reset-flagged-url-maker
   [email password-reset-token]
-  (url-encode (str fp-base-url
-                   fp-entity-uri-prefix
-                   usermeta/pathcomp-users
-                   "/"
-                   email
-                   "/"
-                   usermeta/pathcomp-password-reset-flagged
-                   "/"
-                   password-reset-token)))
+  (str fp-base-url
+       fp-entity-uri-prefix
+       usermeta/pathcomp-users
+       "/"
+       (url-encode email)
+       "/"
+       usermeta/pathcomp-password-reset-flagged
+       "/"
+       password-reset-token))
 
 (def fp-password-reset-form-mustache-template    "web/templates/password-reset-form.html.mustache")
 (def fp-password-reset-success-mustache-template "web/templates/password-reset-success.html.mustache")
