@@ -11,7 +11,7 @@
 
 (def nrepl-server)
 
-(def target-schema-version 5)
+(def target-schema-version 6)
 
 (def ddl-operations
   {0 (fn []
@@ -88,7 +88,11 @@
    5 (fn []
        (j/db-do-commands config/db-spec
                          true
-                         uddl/v2-create-email-verification-token-ddl))})
+                         uddl/v2-create-email-verification-token-ddl))
+   6 (fn []
+       (j/db-do-commands config/db-spec
+                         true
+                         uddl/v3-create-password-reset-token-ddl))})
 
 (defn init-database
   []

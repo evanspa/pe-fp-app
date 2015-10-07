@@ -24,6 +24,10 @@
             [pe-user-rest.resource.send-verification-email-res :as sendveriemailres]
             [pe-user-rest.resource.version.send-verification-email-res-v001]
             [pe-user-rest.resource.account-verification-res :as verificationres]
+            [pe-user-rest.resource.send-password-reset-email-res :as sendpwdresetemailres]
+            [pe-user-rest.resource.version.send-password-reset-email-res-v001]
+            [pe-user-rest.resource.prepare-password-reset-res :as preparepwdresetres]
+            [pe-user-rest.resource.password-reset-res :as pwdresetres]
             [pe-fp-core.ddl :as fpddl]
             [pe-fp-rest.meta :as fpmeta]
             [pe-fp-rest.resource.vehicle.vehicles-res :as vehsres]
@@ -91,6 +95,23 @@
           config/fp-entity-uri-prefix
           usermeta/pathcomp-users
           usermeta/pathcomp-send-verification-email))
+
+(def send-password-reset-email-uri-template
+  (format "%s%s"
+          config/fp-entity-uri-prefix
+          usermeta/pathcomp-send-password-reset-email))
+
+(def prepare-password-reset-uri-template
+  (format "%s%s/:user-id/%s/:password-reset-token"
+          config/fp-entity-uri-prefix
+          usermeta/pathcomp-users
+          usermeta/pathcomp-prepare-password-reset))
+
+(def password-reset-uri-template
+  (format "%s%s/:user-id/%s/:password-reset-token"
+          config/fp-entity-uri-prefix
+          usermeta/pathcomp-users
+          usermeta/pathcomp-password-reset))
 
 (def user-uri-template
   (format "%s%s/:user-id"
@@ -178,6 +199,9 @@
         (rucore/assoc-link (link-fn usermeta/send-verification-email-relation
                                     usermeta/mt-subtype-user
                                     usermeta/pathcomp-send-verification-email))
+        (rucore/assoc-link (link-fn usermeta/send-password-reset-email-relation
+                                    usermeta/mt-subtype-user
+                                    usermeta/pathcomp-send-password-reset-email))
         (rucore/assoc-link (link-fn fpmeta/fp-vehicles-relation
                                     fpmeta/mt-subtype-vehicle
                                     fpmeta/pathcomp-vehicles))
@@ -419,9 +443,9 @@
                            user-links-fn
                            config/fp-verification-email-mustache-template
                            config/fp-verification-email-subject-line
-                           config/fp-verification-email-from
+                           config/fp-support-email-address
                            config/fp-verification-url-maker
-                           config/fp-flagged-url-maker))
+                           config/fp-verification-flagged-url-maker))
   (ANY verification-uri-template
        [user-id
         verification-token]
@@ -476,9 +500,41 @@
                                                      (Long. user-id)
                                                      config/fp-verification-email-mustache-template
                                                      config/fp-verification-email-subject-line
-                                                     config/fp-verification-email-from
+                                                     config/fp-support-email-address
                                                      config/fp-verification-url-maker
-                                                     config/fp-flagged-url-maker))
+                                                     config/fp-verification-flagged-url-maker))
+  (ANY send-password-reset-email-uri-template
+       []
+       (sendpwdresetemailres/send-password-reset-email-res config/db-spec
+                                                           config/fp-mt-subtype-prefix
+                                                           config/fphdr-error-mask
+                                                           config/fp-base-url
+                                                           config/fp-entity-uri-prefix
+                                                           config/fp-password-reset-email-mustache-template
+                                                           config/fp-password-reset-email-subject-line
+                                                           config/fp-support-email-address
+                                                           config/fp-password-reset-url-maker
+                                                           config/fp-password-reset-flagged-url-maker))
+  (ANY prepare-password-reset-uri-template
+       [user-id
+        password-reset-token]
+       (preparepwdresetres/prepare-password-reset-res config/db-spec
+                                                      config/fp-base-url
+                                                      config/fp-entity-uri-prefix
+                                                      user-id
+                                                      password-reset-token
+                                                      config/fp-password-reset-form-mustache-template
+                                                      config/fp-password-reset-error-mustache-template))
+  (ANY password-reset-uri-template
+       [user-id
+        password-reset-token]
+       (pwdresetres/password-reset-res config/db-spec
+                                       config/fp-base-url
+                                       config/fp-entity-uri-prefix
+                                       user-id
+                                       password-reset-token
+                                       config/fp-password-reset-success-mustache-template
+                                       config/fp-password-reset-error-mustache-template))
   (ANY user-uri-template
        [user-id]
        (userres/user-res config/db-spec

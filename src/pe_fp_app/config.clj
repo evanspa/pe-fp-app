@@ -58,8 +58,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def fp-smtp-host (env :fp-smtp-host))
 (alter-var-root (var usercore/*smtp-server-host*) (fn [_] fp-smtp-host))
+(def fp-support-email-address "Gas Jot <support@jotyourself.com>")
 (def fp-verification-email-subject-line "Welcome to Gas Jot! (please verify your account)")
-(def fp-verification-email-from "Gas Jot <support@jotyourself.com>")
+(delivery-mode! :smtp)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Mustache templates
@@ -67,6 +68,11 @@
 (def fp-verification-email-mustache-template "email/templates/welcome-and-verify.html.mustache")
 (def fp-verified-mustache-template "web/templates/account-verified.html.mustache")
 (def fp-error-mustache-template "web/templates/error.html.mustache")
+(def fp-password-reset-email-subject-line "Gas Jot [password reset]")
+(def fp-password-reset-email-mustache-template "email/templates/password-reset.html.mustache")
+(def fp-password-reset-form-mustache-template "web/templates/password-reset-form.html.mustache")
+(def fp-password-reset-success-mustache-template "web/templates/password-reset-success.html.mustache")
+(def fp-password-reset-error-mustache-template "web/templates/password-reset-error.html.mustache")
 
 (defn fp-verification-url-maker
   [user-id verification-token]
@@ -80,7 +86,7 @@
        "/"
        verification-token))
 
-(defn fp-flagged-url-maker
+(defn fp-verification-flagged-url-maker
   [user-id verification-token]
   (str fp-base-url
        fp-entity-uri-prefix
@@ -88,11 +94,33 @@
        "/"
        user-id
        "/"
-       usermeta/pathcomp-flagged
+       usermeta/pathcomp-verification-flagged
        "/"
        verification-token))
 
-(delivery-mode! :smtp)
+(defn fp-password-reset-url-maker
+  [user-id password-reset-token]
+  (str fp-base-url
+       fp-entity-uri-prefix
+       usermeta/pathcomp-users
+       "/"
+       user-id
+       "/"
+       usermeta/pathcomp-password-reset
+       "/"
+       password-reset-token))
+
+(defn fp-password-reset-flagged-url-maker
+  [user-id password-reset-token]
+  (str fp-base-url
+       fp-entity-uri-prefix
+       usermeta/pathcomp-users
+       "/"
+       user-id
+       "/"
+       usermeta/pathcomp-password-reset-flagged
+       "/"
+       password-reset-token))
 
 (defn db-spec-fn
   ([]
