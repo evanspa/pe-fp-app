@@ -448,12 +448,12 @@
                            config/fp-verification-url-maker
                            config/fp-verification-flagged-url-maker))
   (ANY verification-uri-template
-       [user-id
+       [email
         verification-token]
        (verificationres/account-verification-res config/db-spec
                                                  config/fp-base-url
                                                  config/fp-entity-uri-prefix
-                                                 (Long. user-id)
+                                                 email
                                                  verification-token
                                                  config/fp-verification-success-mustache-template
                                                  config/fp-verification-error-mustache-template))

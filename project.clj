@@ -25,16 +25,16 @@
                  [pe-core-utils "0.0.11"]
                  [pe-jdbc-utils "0.0.16"]
                  [pe-rest-utils "0.0.30"]
-                 [pe-user-core "0.1.33"]
-                 [pe-user-rest "0.0.47"]
-                 [pe-fp-core "0.0.20"]
-                 [pe-fp-rest "0.0.27"]]
+                 [pe-user-core "0.1.35"]
+                 [pe-user-rest "0.0.49"]
+                 [pe-fp-core "0.0.22"]
+                 [pe-fp-rest "0.0.28"]]
   :resource-paths ["resources"]
   :ring {:handler pe-fp-app.core/fp-app
          :init pe-fp-app.lifecycle/init
          :destroy pe-fp-app.lifecycle/stop}
   :profiles {:dev {:source-paths ["dev"]  ;ensures 'user.clj' gets auto-loaded
-                   :env {:fp-app-version "0.0.28"
+                   :env {:fp-app-version "0.0.29"
                          :fp-uri-prefix "/gasjot/d/"
                          :fp-db-name "fp"
                          :fp-db-server-host "localhost"
@@ -42,7 +42,7 @@
                          :fp-db-username "postgres"
                          :fp-jdbc-driver-class "org.postgresql.Driver"
                          :fp-jdbc-subprotocol "postgresql"
-                         :fp-base-url "http://localhost:4040"
+                         :fp-base-url "http://localhost"
                          :fp-smtp-host "localhost"
                          :fp-nrepl-server-port 7888}
                    :plugins [[cider/cider-nrepl "0.10.0-SNAPSHOT"]
