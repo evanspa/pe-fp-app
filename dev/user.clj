@@ -28,8 +28,8 @@
 
 (defn- go-with-db-refresh []
   (println "Proceeding to refresh the database")
-  (jcore/drop-database config/db-spec-without-db config/fp-db-name)
-  (jcore/create-database config/db-spec-without-db config/fp-db-name)
+  ;(jcore/drop-database config/db-spec-without-db config/fp-db-name)
+  ;(jcore/create-database config/db-spec-without-db config/fp-db-name)
   (lifecycle/init-database)
   (reset! server (create-and-start-server))
   (println "Jetty server restarted."))

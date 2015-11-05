@@ -4,6 +4,7 @@
             [pe-jdbc-utils.core :as jcore]
             [clojure.java.jdbc :as j]
             [pe-user-core.ddl :as uddl]
+            [pe-fp-core.migration :as fpmig]
             [pe-fp-core.ddl :as fpddl]
             [pe-user-core.core :as usercore]
             [clojure.tools.nrepl.server :as nrepl]
@@ -11,7 +12,7 @@
 
 (def nrepl-server)
 
-(def target-schema-version 6)
+(def target-schema-version 7)
 
 (def ddl-operations
   {0 (fn []
@@ -92,7 +93,12 @@
    6 (fn []
        (j/db-do-commands config/db-spec
                          true
-                         uddl/v3-create-password-reset-token-ddl))})
+                         uddl/v3-create-password-reset-token-ddl))
+   7 (fn []
+       (j/db-do-commands config/db-spec
+                         true
+                         fpddl/v4-fplog-add-odometer-col)
+       (fpmig/v4-migrations config/db-spec))})
 
 (defn init-database
   []
