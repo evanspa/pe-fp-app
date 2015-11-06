@@ -2,8 +2,9 @@
 
 [![Build Status](https://travis-ci.org/evanspa/pe-fp-app.svg)](https://travis-ci.org/evanspa/pe-fp-app)
 
-pe-fp-app is the REST API endpoint for the [fuel purchase system](#about-the-fuel-purchase-system).  The fuel
-purchase system consists of 2 tiers:
+pe-fp-app is the REST API endpoint for the
+[Gas Jot system](#about-the-gas-jot-system).  The Gas Jot system consists
+of 2 tiers:
 [client applications](#client-applications) and the server application.
 pe-fp-app represents the server application; it exposes a REST API endpoint to
 client applications.
@@ -12,7 +13,7 @@ pe-fp-app makes use of the
 [pe-* Clojure library suite](#pe--clojure-library-suite).  In addition to using
 the pe-* library suite, it leverages
 [pe-fp-rest](https://github.com/evanspa/pe-fp-rest), which implements the
-underlying fuel purchase-specific resources of the REST API.  pe-fp-rest is
+underlying gas purchase-specific resources of the REST API.  pe-fp-rest is
 built on top of [pe-fp-core](https://github.com/evanspa/pe-fp-core), which
 implements the core logic, model and data access functionality of the REST
 application.  These tiers are illustrated in the
@@ -22,7 +23,7 @@ application.  These tiers are illustrated in the
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [About the Fuel Purchase System](#about-the-fuel-purchase-system)
+- [About the Gas Jot System](#about-the-gas-jot-system)
   - [Client Applications](#client-applications)
 - [Component Layering](#component-layering)
 - [Dependency Graph](#dependency-graph)
@@ -30,26 +31,28 @@ application.  These tiers are illustrated in the
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## About the Fuel Purchase System
+## About the Gas Jot System
 
-The fuel purchase system provides the ability to record and analyze your vehicle's fuel usage.  In its present form, the fuel purchase system is not terribly useful.  It enables you to collect fuel usage statistics with respect to your vehicles, but none of the analysis / reporting functionality is built out yet.  It exists more as a reference implementation for a set of libraries.
-The fuel purchase system is a client/server one.  This repo, *pe-fp-app*,
-represents the server-side application of the fuel purchase system.  It exists
-as a REST API endpoint for [client applications](#client-applications) of the
-system.  The libraries are generic, and thus are not coupled to the fuel
-purchase system.
+The Gas Jot system provides the ability to record and analyze your vehicle's gas
+usage.  It enables you to collect fuel usage statistics with respect to your
+vehicles.  In addition to being fun to use, Gas Jot also exists as a reference
+implementation for a set of libraries.  The Gas Jot system is a
+client/server one.  This repo, *pe-fp-app*, represents the server-side
+application of the Gas Jot system.  It exists as a REST API endpoint for
+[client applications](#client-applications) of the system.  The libraries are
+generic, and thus are not coupled to the Gas Jot system.
 
 pe-fp-app makes use of the [pe-* Clojure library suite](#pe--clojure-library-suite), as well as [pe-fp-rest](https://github.com/evanspa/pe-fp-rest) (*which uses [pe-fp-core](https://github.com/evanspa/pe-fp-core)*).
 
 ### Client Applications
 
-Currently there only exists an iOS client application for the fuel purchase
+Currently there only exists an iOS client application for the Gas Jot
 system: [PEFuelPurchase-App](https://github.com/evanspa/PEFuelPurchase-App).
 
 ## Component Layering
 
 The following diagram attempts to illustrate the layered architecture of the
-fuel purchase server application.  The various *core* and *rest* libraries
+Gas Jot server application.  The various *core* and *rest* libraries
 encapsulates the bulk of the application; the core logic, model and data access
 functionality.
 
@@ -59,7 +62,7 @@ src="https://github.com/evanspa/pe-fp-app/raw/master/drawings/pe-fp-app-Componen
 ## Dependency Graph
 
 The following diagram attempts to illustrates the dependencies among the main
-components of the fuel purchase server application.
+components of the Gas Jot server application.
 
 <img
 src="https://github.com/evanspa/pe-fp-app/raw/master/drawings/pe-fp-app-Dependency-Graph.png">
