@@ -1,20 +1,20 @@
-# pe-fp-app
+# pe-gasjot-app
 
-[![Build Status](https://travis-ci.org/evanspa/pe-fp-app.svg)](https://travis-ci.org/evanspa/pe-fp-app)
+[![Build Status](https://travis-ci.org/evanspa/pe-gasjot-app.svg)](https://travis-ci.org/evanspa/pe-gasjot-app)
 
-pe-fp-app is the REST API endpoint for the
+pe-gasjot-app is the REST API endpoint for the
 [Gas Jot system](#about-the-gas-jot-system).  The Gas Jot system consists
 of 2 tiers:
 [client applications](#client-applications) and the server application.
 pe-fp-app represents the server application; it exposes a REST API endpoint to
 client applications.
 
-pe-fp-app makes use of the
+pe-gasjot-app makes use of the
 [pe-* Clojure library suite](#pe--clojure-library-suite).  In addition to using
 the pe-* library suite, it leverages
-[pe-fp-rest](https://github.com/evanspa/pe-fp-rest), which implements the
-underlying gas purchase-specific resources of the REST API.  pe-fp-rest is
-built on top of [pe-fp-core](https://github.com/evanspa/pe-fp-core), which
+[pe-gasjot-rest](https://github.com/evanspa/pe-gasjot-rest), which implements the
+underlying gas purchase-specific resources of the REST API.  pe-gasjot-rest is
+built on top of [pe-gasjot-core](https://github.com/evanspa/pe-gasjot-core), which
 implements the core logic, model and data access functionality of the REST
 application.  These tiers are illustrated in the
 [component layering](#component-layering) diagram below.
@@ -37,12 +37,12 @@ The Gas Jot system provides the ability to record and analyze your vehicle's gas
 usage.  It enables you to collect fuel usage statistics with respect to your
 vehicles.  In addition to being fun to use, Gas Jot also exists as a reference
 implementation for a set of libraries.  The Gas Jot system is a
-client/server one.  This repo, *pe-fp-app*, represents the server-side
+client/server one.  This repo, *pe-gasjot-app*, represents the server-side
 application of the Gas Jot system.  It exists as a REST API endpoint for
 [client applications](#client-applications) of the system.  The libraries are
 generic, and thus are not coupled to the Gas Jot system.
 
-pe-fp-app makes use of the [pe-* Clojure library suite](#pe--clojure-library-suite), as well as [pe-fp-rest](https://github.com/evanspa/pe-fp-rest) (*which uses [pe-fp-core](https://github.com/evanspa/pe-fp-core)*).
+pe-gasjot-app makes use of the [pe-* Clojure library suite](#pe--clojure-library-suite), as well as [pe-gasjot-rest](https://github.com/evanspa/pe-gasjot-rest) (*which uses [pe-gasjot-core](https://github.com/evanspa/pe-gasjot-core)*).
 
 ### Client Applications
 
@@ -57,7 +57,7 @@ encapsulates the bulk of the application; the core logic, model and data access
 functionality.
 
 <img
-src="https://github.com/evanspa/pe-fp-app/raw/master/drawings/pe-fp-app-Component-Layers.png">
+src="https://github.com/evanspa/pe-gasjot-app/raw/master/drawings/pe-fp-app-Component-Layers.png">
 
 ## Dependency Graph
 
@@ -65,7 +65,7 @@ The following diagram attempts to illustrates the dependencies among the main
 components of the Gas Jot server application.
 
 <img
-src="https://github.com/evanspa/pe-fp-app/raw/master/drawings/pe-fp-app-Dependency-Graph.png">
+src="https://github.com/evanspa/pe-gasjot-app/raw/master/drawings/pe-fp-app-Dependency-Graph.png">
 
 ## pe-* Clojure Library Suite
 The pe-* Clojure library suite is a set of Clojure libraries to aid in the
