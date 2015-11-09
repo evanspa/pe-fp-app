@@ -47,7 +47,7 @@ pe-gasjot-app makes use of the [pe-* Clojure library suite](#pe--clojure-library
 ### Client Applications
 
 Currently there only exists an iOS client application for the Gas Jot
-system: [PEFuelPurchase-App](https://github.com/evanspa/PEFuelPurchase-App).
+system: [GasJot-ios](https://github.com/evanspa/GasJot-ios).
 
 ## Component Layering
 
