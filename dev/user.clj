@@ -11,6 +11,7 @@
             [ring.server.standalone :refer (serve)]
             [pe-user-core.core :as usercore]
             [pe-fp-core.core :as fpcore]
+            [pe-fp-core.admin :as fpadmin]
             [pe-fp-app.config :as config]
             [pe-fp-app.lifecycle :as lifecycle]
             [pe-fp-app.core :as core]
