@@ -12,7 +12,7 @@
 
 (def nrepl-server)
 
-(def target-schema-version 7)
+(def target-schema-version 8)
 
 (def ddl-operations
   {0 (fn []
@@ -98,7 +98,12 @@
        (j/db-do-commands config/db-spec
                          true
                          fpddl/v4-fplog-add-odometer-col)
-       (fpmig/v4-migrations config/db-spec))})
+       (fpmig/v4-migrations config/db-spec))
+   8 (fn []
+       (j/db-do-commands config/db-spec
+                         true
+                         fpddl/v5-fplog-add-diesel-col
+                         fpddl/v5-vehicle-add-field-set-mask-col))})
 
 (defn init-database
   []

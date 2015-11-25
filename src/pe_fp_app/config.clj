@@ -69,6 +69,17 @@
 (def fp-verification-email-mustache-template             "email/templates/account-verification.html.mustache")
 (def fp-welcome-and-verification-email-subject-line "Welcome to Gas Jot! [please verify your account]")
 (def fp-verification-email-subject-line "Gas Jot [account verification]")
+
+(def err-notification-mustache-template "email/templates/err-notification.html.mustache")
+(def err-subject    (env :fp-err-notification-subject))
+(def err-from-email (env :fp-err-notification-from-email))
+(def err-to-email   (env :fp-err-notification-to-email))
+
+(def new-user-notification-mustache-template "email/templates/new-signup-notification.html.mustache")
+(def new-user-notification-from-email (env :fp-new-user-notification-from-email))
+(def new-user-notification-to-email   (env :fp-new-user-notification-to-email))
+(def new-user-notification-subject    (env :fp-new-user-notification-subject))
+
 (defn fp-verification-url-maker
   [email verification-token]
   (str fp-base-url

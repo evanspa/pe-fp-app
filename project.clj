@@ -1,4 +1,4 @@
-(defproject pe-fp-app "0.0.32"
+(defproject pe-fp-app "0.0.33"
   :description "The fuel purchase application REST API endpoint."
   :url "https://github.com/evanspa/pe-fp-app"
   :license {:name "MIT"
@@ -24,17 +24,17 @@
                  [javax.mail/mail "1.4.7"]
                  [pe-core-utils "0.0.11"]
                  [pe-jdbc-utils "0.0.18"]
-                 [pe-rest-utils "0.0.30"]
-                 [pe-user-core "0.1.37"]
-                 [pe-user-rest "0.0.49"]
-                 [pe-fp-core "0.0.26"]
-                 [pe-fp-rest "0.0.29"]]
+                 [pe-rest-utils "0.0.34"]
+                 [pe-user-core "0.1.38"]
+                 [pe-user-rest "0.0.51"]
+                 [pe-fp-core "0.0.28"]
+                 [pe-fp-rest "0.0.32"]]
   :resource-paths ["resources"]
   :ring {:handler pe-fp-app.core/fp-app
          :init pe-fp-app.lifecycle/init
          :destroy pe-fp-app.lifecycle/stop}
   :profiles {:dev {:source-paths ["dev"]  ;ensures 'user.clj' gets auto-loaded
-                   :env {:fp-app-version "0.0.32"
+                   :env {:fp-app-version "0.0.33"
                          :fp-uri-prefix "/gasjot/d/"
                          :fp-db-name "fp"
                          :fp-db-server-host "localhost"
@@ -44,7 +44,13 @@
                          :fp-jdbc-subprotocol "postgresql"
                          :fp-base-url "http://localhost"
                          :fp-smtp-host "localhost"
-                         :fp-nrepl-server-port 7888}
+                         :fp-nrepl-server-port 7888
+                         :fp-new-user-notification-from-email "alerts@jotyourself.com"
+                         :fp-new-user-notification-to-email "alerts@jotyourself.com"
+                         :fp-new-user-notification-subject "New Gas Jot Sign-up!"
+                         :fp-err-notification-subject "Gas Jot Error Caught"
+                         :fp-err-notification-from-email "errors@jotyourself.com"
+                         :fp-err-notification-to-email "errors@jotyourself.com"}
                    :plugins [[cider/cider-nrepl "0.10.0-SNAPSHOT"]
                              [lein-environ "1.0.0"]
                              [lein-ring "0.8.13"]]
