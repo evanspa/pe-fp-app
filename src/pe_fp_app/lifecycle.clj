@@ -102,8 +102,14 @@
    8 (fn []
        (j/db-do-commands config/db-spec
                          true
-                         fpddl/v5-fplog-add-diesel-col
-                         fpddl/v5-vehicle-add-field-set-mask-col))})
+                         fpddl/v5-vehicle-add-diesel-col
+                         fpddl/v5-vehicle-add-has-dte-readout-col
+                         fpddl/v5-vehicle-add-has-mpg-readout-col
+                         fpddl/v5-vehicle-add-has-mph-readout-col
+                         fpddl/v5-vehicle-add-has-outside-temp-readout-col
+                         fpddl/v5-vehicle-add-vin-col
+                         fpddl/v5-vehicle-add-plate-col
+                         fpddl/v5-fplog-add-diesel-col))})
 
 (defn init-database
   []
