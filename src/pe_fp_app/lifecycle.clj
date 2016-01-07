@@ -116,7 +116,10 @@
                          true
                          fpddl/v6-create-fuelstation-type-ddl
                          fpddl/v6-fuelstation-add-fstype-col
-                         fpddl/v6-create-postgis-extension)
+
+                         ; can only be done by super user
+                         ;fpddl/v6-create-postgis-extension
+                         )
        (fpddl/v6-fuelstation-add-location-col-sql config/db-spec)
        (fpdataloads/v6-data-loads config/db-spec))})
 
