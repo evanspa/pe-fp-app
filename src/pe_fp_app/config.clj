@@ -165,9 +165,11 @@
                              subname-prefix)
                   :user fp-db-username
                   :password fp-db-password}]
-     (j/with-db-connection [con-db db-spec]
-       (let [jdbc-conn (:connection con-db)]
-         (.addDataType jdbc-conn "geometry" org.postgis.PGgeometry)))
+     ; only do the following when db-name was explicitly provided
+     (when db-name
+       (j/with-db-connection [con-db db-spec]
+         (let [jdbc-conn (:connection con-db)]
+           (.addDataType jdbc-conn "geometry" org.postgis.PGgeometry))))
      db-spec)))
 
 (def db-spec-without-db (db-spec-fn nil))
