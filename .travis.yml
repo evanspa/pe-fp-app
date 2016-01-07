@@ -5,3 +5,4 @@ addons:
 
 before_script:
   - psql -c 'create database fp;' -U postgres
+  - psql -U postgres -d fp -c "create extension postgis"
