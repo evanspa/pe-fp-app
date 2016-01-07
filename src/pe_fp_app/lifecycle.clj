@@ -5,6 +5,7 @@
             [clojure.java.jdbc :as j]
             [pe-user-core.ddl :as uddl]
             [pe-fp-core.migration :as fpmig]
+            [pe-fp-core.data-loads :as fpdataloads]
             [pe-fp-core.ddl :as fpddl]
             [pe-user-core.core :as usercore]
             [clojure.tools.nrepl.server :as nrepl]
@@ -12,7 +13,7 @@
 
 (def nrepl-server)
 
-(def target-schema-version 8)
+(def target-schema-version 9)
 
 (def ddl-operations
   {0 (fn []
@@ -109,7 +110,15 @@
                          fpddl/v5-vehicle-add-has-outside-temp-readout-col
                          fpddl/v5-vehicle-add-vin-col
                          fpddl/v5-vehicle-add-plate-col
-                         fpddl/v5-fplog-add-diesel-col))})
+                         fpddl/v5-fplog-add-diesel-col))
+   9 (fn []
+       (j/db-do-commands config/db-spec
+                         true
+                         fpddl/v6-create-fuelstation-type-ddl
+                         fpddl/v6-fuelstation-add-fstype-col
+                         fpddl/v6-create-postgis-extension)
+       (fpddl/v6-fuelstation-add-location-col-sql config/db-spec)
+       (fpdataloads/v6-data-loads config/db-spec))})
 
 (defn init-database
   []

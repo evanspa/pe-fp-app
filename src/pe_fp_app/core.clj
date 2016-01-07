@@ -14,6 +14,8 @@
             [pe-user-core.core :as usercore]
             [pe-user-rest.utils :as userresutils]
             [pe-user-rest.meta :as usermeta]
+            [pe-fp-rest.resource.price-stream.price-stream-res :as pricestreamres]
+            [pe-fp-rest.resource.price-stream.version.price-stream-res-v001]
             [pe-user-rest.resource.users-res :as usersres]
             [pe-user-rest.resource.version.users-res-v001]
             [pe-user-rest.resource.user-res :as userres]
@@ -64,6 +66,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; URL templates for routing
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def price-stream-uri-template
+  (format "%s%s"
+          config/fp-entity-uri-prefix
+          meta/pathcomp-price-stream))
+
 (def users-uri-template
   (format "%s%s"
           config/fp-entity-uri-prefix
@@ -431,6 +438,18 @@
 ;; The routes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defroutes fp-routes
+  (ANY price-stream-uri-template
+       []
+       (pricestreamres/price-stream-res config/db-spec
+                                        config/fp-mt-subtype-prefix
+                                        config/fphdr-auth-token
+                                        config/fphdr-error-mask
+                                        config/fp-base-url
+                                        config/fp-entity-uri-prefix
+                                        config/err-notification-mustache-template
+                                        config/err-subject
+                                        config/err-from-email
+                                        config/err-to-email))
   (ANY users-uri-template
        []
        (usersres/users-res config/db-spec

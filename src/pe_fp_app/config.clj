@@ -1,6 +1,7 @@
 (ns pe-fp-app.config
   (:require [environ.core :refer [env]]
             [ring.util.codec :refer [url-encode]]
+            [clojure.java.jdbc :as j]
             [pe-user-core.core :as usercore]
             [pe-user-rest.meta :as usermeta]
             [clojurewerkz.mailer.core :refer [delivery-mode!]]))
@@ -156,14 +157,18 @@
   ([]
    (db-spec-fn nil))
   ([db-name]
-   (let [subname-prefix (format "//%s:%s/" fp-db-server-host fp-db-server-port)]
-     {:classname fp-jdbc-driver-class
-      :subprotocol fp-jdbc-subprotocol
-      :subname (if db-name
-                 (str subname-prefix db-name)
-                 subname-prefix)
-      :user fp-db-username
-      :password fp-db-password})))
+   (let [subname-prefix (format "//%s:%s/" fp-db-server-host fp-db-server-port)
+         db-spec {:classname fp-jdbc-driver-class
+                  :subprotocol fp-jdbc-subprotocol
+                  :subname (if db-name
+                             (str subname-prefix db-name)
+                             subname-prefix)
+                  :user fp-db-username
+                  :password fp-db-password}]
+     (j/with-db-connection [con-db db-spec]
+       (let [jdbc-conn (:connection con-db)]
+         (.addDataType jdbc-conn "geometry" org.postgis.PGgeometry)))
+     db-spec)))
 
 (def db-spec-without-db (db-spec-fn nil))
 (def db-spec (db-spec-fn fp-db-name))
