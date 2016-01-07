@@ -4,6 +4,7 @@
             [clojure.tools.logging :as log]
             [clj-time.core :as t]
             [clj-time.coerce :as c]
+            [clojure.java.jdbc :as j]
             [pe-fp-core.core :as fpcore]
             [pe-user-core.core :as usercore]
             [pe-jdbc-utils.core :as jcore]
@@ -18,6 +19,7 @@
             [pe-rest-utils.changelog.meta :as clmeta]
             [pe-fp-rest.meta :as fpmeta]
             [pe-rest-utils.meta :as rumeta]
+            [pe-fp-core.ddl :as fpddl]
             [clojurewerkz.mailer.core :refer [delivery-mode!]]))
 
 (alter-var-root (var usercore/*smtp-server-host*) (fn [_] nil))
@@ -28,6 +30,9 @@
 (use-fixtures :each (fn [f]
                       (jcore/drop-database config/db-spec-without-db config/fp-db-name)
                       (jcore/create-database config/db-spec-without-db config/fp-db-name)
+                      (j/db-do-commands config/db-spec
+                                        true
+                                        fpddl/v6-create-postgis-extension)
                       (lifecycle/init-database)
                       (f)))
 

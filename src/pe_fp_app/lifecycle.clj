@@ -115,9 +115,7 @@
        (j/db-do-commands config/db-spec
                          true
                          fpddl/v6-create-fuelstation-type-ddl
-                         fpddl/v6-fuelstation-add-fstype-col)
-       (fpddl/v6-fuelstation-add-location-col-sql config/db-spec)
-       (fpdataloads/v6-data-loads config/db-spec))
+                         fpddl/v6-fuelstation-add-fstype-col))
    10 (fn []
         (fpddl/v6-fuelstation-add-location-col-sql config/db-spec)
         (fpdataloads/v6-data-loads config/db-spec))})
