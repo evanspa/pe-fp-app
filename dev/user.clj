@@ -18,6 +18,8 @@
             [clojure.tools.logging :as log]
             [environ.core :refer [env]]
             [pe-jdbc-utils.core :as jcore]
+            [clojure.java.jdbc :as j]
+            [pe-fp-core.ddl :as fpddl]
             [clojure.tools.namespace.repl :refer (refresh refresh-all)]
             [pe-rest-utils.core :refer [*retry-after*]]))
 
@@ -31,6 +33,9 @@
   (println "Proceeding to refresh the database")
   ;(jcore/drop-database config/db-spec-without-db config/fp-db-name)
   ;(jcore/create-database config/db-spec-without-db config/fp-db-name)
+  (j/db-do-commands config/db-spec
+                    true
+                    fpddl/v6-create-postgis-extension)
   (lifecycle/init-database)
   (reset! server (create-and-start-server))
   (println "Jetty server restarted."))
