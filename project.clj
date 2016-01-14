@@ -23,13 +23,13 @@
                  [environ "1.0.0"]
                  [clojurewerkz/mailer "1.2.0"]
                  [javax.mail/mail "1.4.7"]
-                 [pe-core-utils "0.0.11"]
+                 [pe-core-utils "0.0.12"]
                  [pe-jdbc-utils "0.0.18"]
                  [pe-rest-utils "0.0.37"]
                  [pe-user-core "0.1.38"]
                  [pe-user-rest "0.0.52"]
-                 [pe-fp-core "0.0.42"]
-                 [pe-fp-rest "0.0.36"]]
+                 [pe-fp-core "0.0.43"]
+                 [pe-fp-rest "0.0.37"]]
   :resource-paths ["resources"]
   :ring {:handler pe-fp-app.core/fp-app
          :init pe-fp-app.lifecycle/init
@@ -51,7 +51,8 @@
                          :fp-new-user-notification-subject "New Gas Jot Sign-up!"
                          :fp-err-notification-subject "Gas Jot Error Caught"
                          :fp-err-notification-from-email "errors@jotyourself.com"
-                         :fp-err-notification-to-email "errors@jotyourself.com"}
+                         :fp-err-notification-to-email "errors@jotyourself.com"
+                         :fp-min-distance-diff-fs 50}
                    :plugins [[cider/cider-nrepl "0.10.0"]
                              [lein-environ "1.0.0"]
                              [lein-ring "0.8.13"]]

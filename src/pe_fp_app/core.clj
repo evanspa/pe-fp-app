@@ -449,7 +449,8 @@
                                         config/err-notification-mustache-template
                                         config/err-subject
                                         config/err-from-email
-                                        config/err-to-email))
+                                        config/err-to-email
+                                        config/fp-min-distance-diff-fs))
   (ANY users-uri-template
        []
        (usersres/users-res config/db-spec
