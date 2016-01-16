@@ -24,13 +24,15 @@
 
 (alter-var-root (var usercore/*smtp-server-host*) (fn [_] nil))
 
+(alter-var-root (var config/*use-unpooled-db*) (fn [_] true))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Fixtures
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-fixtures :each (fn [f]
-                      (jcore/drop-database config/db-spec-without-db config/fp-db-name)
-                      (jcore/create-database config/db-spec-without-db config/fp-db-name)
-                      (j/db-do-commands config/db-spec
+                      (jcore/drop-database (config/db-spec-without-db) config/fp-db-name)
+                      (jcore/create-database (config/db-spec-without-db) config/fp-db-name)
+                      (j/db-do-commands (config/db-spec)
                                         true
                                         fpddl/v6-create-postgis-extension)
                       (lifecycle/init-database)
@@ -41,16 +43,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (deftest integration-test-1
   (testing "Multiple Logins of user and subsequent authenticated request."
-    (is (nil? (usercore/load-user-by-email config/db-spec "smithka@testing.com")))
-    (is (nil? (usercore/load-user-by-username config/db-spec "smithk")))
+    (is (nil? (usercore/load-user-by-email (config/db-spec) "smithka@testing.com")))
+    (is (nil? (usercore/load-user-by-username (config/db-spec) "smithk")))
     (let [user {:user/name "Karen Smith"
                 :user/email "smithka@testing.com"
                 :user/password "insecure"}
-          new-user-id (usercore/next-user-account-id config/db-spec)]
-      (usercore/save-new-user config/db-spec
+          new-user-id (usercore/next-user-account-id (config/db-spec))]
+      (usercore/save-new-user (config/db-spec)
                               new-user-id
                               user)
-      (is (not (nil? (usercore/load-user-by-email config/db-spec "smithka@testing.com")))))
+      (is (not (nil? (usercore/load-user-by-email (config/db-spec) "smithka@testing.com")))))
     ;; 1st Login
     (let [user {"user/username-or-email" "smithka@testing.com"
                 "user/password" "insecure"}
@@ -98,7 +100,7 @@
             charset (get rumeta/char-sets (:charset pct))
             resp-user (rucore/read-res pct resp-body-stream charset)
             auth-token (get hdrs config/fphdr-auth-token)
-            [loaded-user-entid loaded-user-ent] (usercore/load-user-by-authtoken config/db-spec
+            [loaded-user-entid loaded-user-ent] (usercore/load-user-by-authtoken (config/db-spec)
                                                                                  (Long. resp-user-entid-str)
                                                                                  auth-token)]
         (letfn [(get-changelog [modified-since expected-status-code expected-num-entities]
@@ -137,7 +139,7 @@
           (get-changelog (t/now) 304 0)
           (is (not (nil? loaded-user-ent)))
           ;; Create 1st vehicle
-          (is (empty? (fpcore/vehicles-for-user config/db-spec loaded-user-entid)))
+          (is (empty? (fpcore/vehicles-for-user (config/db-spec) loaded-user-entid)))
           (let [vehicle {"fpvehicle/name" "300Z"
                          "fpvehicle/default-octane" 93}
                 vehicles-uri (str config/fp-base-url
@@ -185,7 +187,7 @@
                   (is (not (nil? (get resp-veh "fpvehicle/created-at"))))
                   (is (not (nil? (get resp-veh "fpvehicle/updated-at"))))
                   (is (= 93 (get resp-veh "fpvehicle/default-octane")))
-                  (let [loaded-vehicles (fpcore/vehicles-for-user config/db-spec loaded-user-entid)]
+                  (let [loaded-vehicles (fpcore/vehicles-for-user (config/db-spec) loaded-user-entid)]
                     (is (= 1 (count loaded-vehicles)))
                     (let [[[loaded-veh-300z-entid loaded-veh-300z]] loaded-vehicles]
                       (is (= (Long/parseLong resp-veh-entid-str) loaded-veh-300z-entid))
@@ -238,7 +240,7 @@
                               (is (= 87 (get resp-veh "fpvehicle/default-octane")))
                               (let [loaded-vehicles (sort-by (fn [[_ veh]] (:fpvehicle/date-added veh))
                                                              #(compare %2 %1)
-                                                             (vec (fpcore/vehicles-for-user config/db-spec loaded-user-entid)))]
+                                                             (vec (fpcore/vehicles-for-user (config/db-spec) loaded-user-entid)))]
                                 (is (= 2 (count loaded-vehicles)))
                                 (let [[[loaded-veh-mazda-entid loaded-veh-mazda] _] loaded-vehicles]
                                   (is (= (Long/parseLong resp-veh-entid-str) loaded-veh-mazda-entid))
@@ -289,15 +291,15 @@
 
 (deftest integration-test-2
   (testing "Login of user and subsequent authenticated request."
-    (is (nil? (usercore/load-user-by-email config/db-spec "smithka@testing.com")))
-    (is (nil? (usercore/load-user-by-username config/db-spec "smithk")))
+    (is (nil? (usercore/load-user-by-email (config/db-spec) "smithka@testing.com")))
+    (is (nil? (usercore/load-user-by-username (config/db-spec) "smithk")))
     (let [user {:user/name "Karen Smith"
                 :user/email "smithka@testing.com"
                 :user/password "insecure"}]
-      (usercore/save-new-user config/db-spec
-                              (usercore/next-user-account-id config/db-spec)
+      (usercore/save-new-user (config/db-spec)
+                              (usercore/next-user-account-id (config/db-spec))
                               user)
-      (is (not (nil? (usercore/load-user-by-email config/db-spec "smithka@testing.com")))))
+      (is (not (nil? (usercore/load-user-by-email (config/db-spec) "smithka@testing.com")))))
     (let [user {"user/username-or-email" "smithka@testing.com"
                 "user/password" "insecure"}
           req (-> (rtucore/req-w-std-hdrs rumeta/mt-type
@@ -324,12 +326,12 @@
             charset (get rumeta/char-sets (:charset pct))
             resp-user (rucore/read-res pct resp-body-stream charset)
             auth-token (get hdrs config/fphdr-auth-token)
-            [loaded-user-entid loaded-user-ent] (usercore/load-user-by-authtoken config/db-spec
+            [loaded-user-entid loaded-user-ent] (usercore/load-user-by-authtoken (config/db-spec)
                                                                                  (Long. resp-user-entid-str)
                                                                                  auth-token)]
         (is (not (nil? loaded-user-ent)))
         ;; Create 1st vehicle
-        (is (empty? (fpcore/vehicles-for-user config/db-spec loaded-user-entid)))
+        (is (empty? (fpcore/vehicles-for-user (config/db-spec) loaded-user-entid)))
         (let [vehicle {"fpvehicle/name" "300Z"
                        "fpvehicle/default-octane" 93}
               vehicles-uri (str config/fp-base-url
@@ -375,7 +377,7 @@
                 (is (not (nil? (get resp-veh "fpvehicle/updated-at"))))
                 (is (= "300Z" (get resp-veh "fpvehicle/name")))
                 (is (= 93 (get resp-veh "fpvehicle/default-octane")))
-                (let [loaded-vehicles (fpcore/vehicles-for-user config/db-spec loaded-user-entid)]
+                (let [loaded-vehicles (fpcore/vehicles-for-user (config/db-spec) loaded-user-entid)]
                   (is (= 1 (count loaded-vehicles)))
                   (let [[[loaded-veh-300z-entid loaded-veh-300z]] loaded-vehicles]
                     (is (= (Long/parseLong resp-veh-entid-str) loaded-veh-300z-entid))
@@ -426,7 +428,7 @@
                             (is (not (nil? resp-veh)))
                             (is (= "Mazda CX-9" (get resp-veh "fpvehicle/name")))
                             (is (= 87 (get resp-veh "fpvehicle/default-octane")))
-                            (let [loaded-vehicles (fpcore/vehicles-for-user config/db-spec loaded-user-entid)]
+                            (let [loaded-vehicles (fpcore/vehicles-for-user (config/db-spec) loaded-user-entid)]
                               (is (= 2 (count loaded-vehicles)))
                               (let [[[loaded-veh-mazda-entid loaded-veh-mazda] _] loaded-vehicles]
                                 (is (= (Long/parseLong resp-veh-entid-str) loaded-veh-mazda-entid))
@@ -435,8 +437,8 @@
 
 (deftest integration-test-3
   (testing "Successful creation of user  and vehicles."
-    (is (nil? (usercore/load-user-by-email config/db-spec "smithka@testing.com")))
-    (is (nil? (usercore/load-user-by-username config/db-spec "smithk")))
+    (is (nil? (usercore/load-user-by-email (config/db-spec) "smithka@testing.com")))
+    (is (nil? (usercore/load-user-by-username (config/db-spec) "smithk")))
     (let [user {"user/name" "Karen Smith"
                 "user/email" "smithka@testing.com"
                 "user/username" "smithk"
@@ -465,11 +467,11 @@
             charset (get rumeta/char-sets (:charset pct))
             resp-user (rucore/read-res pct resp-body-stream charset)
             auth-token (get hdrs config/fphdr-auth-token)
-            [loaded-user-entid loaded-user-ent] (usercore/load-user-by-authtoken config/db-spec
+            [loaded-user-entid loaded-user-ent] (usercore/load-user-by-authtoken (config/db-spec)
                                                                                  (Long. resp-user-entid-str)
                                                                                  auth-token)]
         ;; Create 1st vehicle
-        (is (empty? (fpcore/vehicles-for-user config/db-spec loaded-user-entid)))
+        (is (empty? (fpcore/vehicles-for-user (config/db-spec) loaded-user-entid)))
         (let [vehicle {"fpvehicle/name" "300Z"
                        "fpvehicle/default-octane" 93}
               vehicles-uri (str config/fp-base-url
@@ -513,7 +515,7 @@
                 (is (not (nil? resp-veh)))
                 (is (= "300Z" (get resp-veh "fpvehicle/name")))
                 (is (= 93 (get resp-veh "fpvehicle/default-octane")))
-                (let [loaded-vehicles (fpcore/vehicles-for-user config/db-spec loaded-user-entid)]
+                (let [loaded-vehicles (fpcore/vehicles-for-user (config/db-spec) loaded-user-entid)]
                   (is (= 1 (count loaded-vehicles)))
                   (let [[[loaded-veh-300z-entid loaded-veh-300z]] loaded-vehicles]
                     (is (= (Long/parseLong resp-veh-entid-str) loaded-veh-300z-entid))
@@ -563,7 +565,7 @@
                             (is (not (nil? resp-veh)))
                             (is (= "Mazda CX-9" (get resp-veh "fpvehicle/name")))
                             (is (= 87 (get resp-veh "fpvehicle/default-octane")))
-                            (let [loaded-vehicles (fpcore/vehicles-for-user config/db-spec loaded-user-entid)]
+                            (let [loaded-vehicles (fpcore/vehicles-for-user (config/db-spec) loaded-user-entid)]
                               (is (= 2 (count loaded-vehicles)))
                               (let [[[loaded-veh-mazda-entid loaded-veh-mazda] _] loaded-vehicles]
                                 (is (= (Long/parseLong resp-veh-entid-str) loaded-veh-mazda-entid))

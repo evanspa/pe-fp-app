@@ -440,7 +440,7 @@
 (defroutes fp-routes
   (ANY price-stream-uri-template
        []
-       (pricestreamres/price-stream-res config/db-spec
+       (pricestreamres/price-stream-res (config/pooled-db-spec)
                                         config/fp-mt-subtype-prefix
                                         config/fphdr-auth-token
                                         config/fphdr-error-mask
@@ -453,7 +453,7 @@
                                         config/fp-min-distance-diff-fs))
   (ANY users-uri-template
        []
-       (usersres/users-res config/db-spec
+       (usersres/users-res (config/pooled-db-spec)
                            config/fp-mt-subtype-prefix
                            config/fphdr-auth-token
                            config/fphdr-error-mask
@@ -478,7 +478,7 @@
   (ANY verification-uri-template
        [email
         verification-token]
-       (verificationres/account-verification-res config/db-spec
+       (verificationres/account-verification-res (config/pooled-db-spec)
                                                  config/fp-base-url
                                                  config/fp-entity-uri-prefix
                                                  email
@@ -491,7 +491,7 @@
                                                  config/err-to-email))
   (ANY login-uri-template
        []
-       (loginres/login-res config/db-spec
+       (loginres/login-res (config/pooled-db-spec)
                            config/fp-mt-subtype-prefix
                            config/fphdr-auth-token
                            config/fphdr-error-mask
@@ -506,7 +506,7 @@
                            config/err-to-email))
   (ANY light-login-uri-template
        []
-       (loginres/light-login-res config/db-spec
+       (loginres/light-login-res (config/pooled-db-spec)
                                  config/fp-mt-subtype-prefix
                                  config/fphdr-auth-token
                                  config/fphdr-error-mask
@@ -519,7 +519,7 @@
                                  config/err-to-email))
   (ANY logout-uri-template
        [user-id]
-       (logoutres/logout-res config/db-spec
+       (logoutres/logout-res (config/pooled-db-spec)
                              config/fp-mt-subtype-prefix
                              config/fphdr-auth-token
                              config/fphdr-error-mask
@@ -534,7 +534,7 @@
                              config/err-to-email))
   (ANY send-verification-email-uri-template
        [user-id]
-       (sendveriemailres/send-verification-email-res config/db-spec
+       (sendveriemailres/send-verification-email-res (config/pooled-db-spec)
                                                      config/fp-mt-subtype-prefix
                                                      config/fphdr-auth-token
                                                      config/fphdr-error-mask
@@ -554,7 +554,7 @@
                                                      config/err-to-email))
   (ANY send-password-reset-email-uri-template
        []
-       (sendpwdresetemailres/send-password-reset-email-res config/db-spec
+       (sendpwdresetemailres/send-password-reset-email-res (config/pooled-db-spec)
                                                            config/fp-mt-subtype-prefix
                                                            config/fphdr-error-mask
                                                            config/fp-base-url
@@ -571,7 +571,7 @@
   (ANY prepare-password-reset-uri-template
        [email
         password-reset-token]
-       (preparepwdresetres/prepare-password-reset-res config/db-spec
+       (preparepwdresetres/prepare-password-reset-res (config/pooled-db-spec)
                                                       config/fp-base-url
                                                       config/fp-entity-uri-prefix
                                                       (url-decode email)
@@ -586,7 +586,7 @@
   (ANY password-reset-uri-template
        [email
         password-reset-token]
-       (pwdresetres/password-reset-res config/db-spec
+       (pwdresetres/password-reset-res (config/pooled-db-spec)
                                        config/fp-base-url
                                        config/fp-entity-uri-prefix
                                        (url-decode email)
@@ -599,7 +599,7 @@
                                        config/err-to-email))
   (ANY user-uri-template
        [user-id]
-       (userres/user-res config/db-spec
+       (userres/user-res (config/pooled-db-spec)
                          config/fp-mt-subtype-prefix
                          config/fphdr-auth-token
                          config/fphdr-error-mask
@@ -630,7 +630,7 @@
                  (loc-fn-maker [pathcomp]
                    (fn [id]
                      (make-user-subentity-url user-id pathcomp id)))]
-           (clres/changelog-res config/db-spec
+           (clres/changelog-res (config/pooled-db-spec)
                                 config/fp-mt-subtype-prefix
                                 config/fphdr-auth-token
                                 config/fphdr-error-mask
@@ -643,7 +643,7 @@
                                 nil ; links-fn
                                 config/fphdr-if-modified-since
                                 (fn [ctx] (userresutils/authorized? ctx
-                                                                    config/db-spec
+                                                                    (config/pooled-db-spec)
                                                                     user-id-l
                                                                     config/fp-auth-scheme
                                                                     config/fp-auth-scheme-param-name))
@@ -663,7 +663,7 @@
 
   (ANY vehicles-uri-template
        [user-id]
-       (vehsres/vehicles-res config/db-spec
+       (vehsres/vehicles-res (config/pooled-db-spec)
                              config/fp-mt-subtype-prefix
                              config/fphdr-auth-token
                              config/fphdr-error-mask
@@ -680,7 +680,7 @@
                              config/err-to-email))
   (ANY vehicle-uri-template
        [user-id vehicle-id]
-       (vehres/vehicle-res config/db-spec
+       (vehres/vehicle-res (config/pooled-db-spec)
                            config/fp-mt-subtype-prefix
                            config/fphdr-auth-token
                            config/fphdr-error-mask
@@ -700,7 +700,7 @@
                            config/err-to-email))
   (ANY fuelstations-uri-template
        [user-id]
-       (fssres/fuelstations-res config/db-spec
+       (fssres/fuelstations-res (config/pooled-db-spec)
                                 config/fp-mt-subtype-prefix
                                 config/fphdr-auth-token
                                 config/fphdr-error-mask
@@ -717,7 +717,7 @@
                                 config/err-to-email))
   (ANY fuelstation-uri-template
        [user-id fuelstation-id]
-       (fsres/fuelstation-res config/db-spec
+       (fsres/fuelstation-res (config/pooled-db-spec)
                               config/fp-mt-subtype-prefix
                               config/fphdr-auth-token
                               config/fphdr-error-mask
@@ -737,7 +737,7 @@
                               config/err-to-email))
   (ANY envlogs-uri-template
        [user-id]
-       (envlogsres/envlogs-res config/db-spec
+       (envlogsres/envlogs-res (config/pooled-db-spec)
                                config/fp-mt-subtype-prefix
                                config/fphdr-auth-token
                                config/fphdr-error-mask
@@ -754,7 +754,7 @@
                                config/err-to-email))
   (ANY envlog-uri-template
        [user-id envlog-id]
-       (envlogres/envlog-res config/db-spec
+       (envlogres/envlog-res (config/pooled-db-spec)
                              config/fp-mt-subtype-prefix
                              config/fphdr-auth-token
                              config/fphdr-error-mask
@@ -774,7 +774,7 @@
                              config/err-to-email))
   (ANY fplogs-uri-template
        [user-id]
-       (fplogsres/fplogs-res config/db-spec
+       (fplogsres/fplogs-res (config/pooled-db-spec)
                              config/fp-mt-subtype-prefix
                              config/fphdr-auth-token
                              config/fphdr-error-mask
@@ -791,7 +791,7 @@
                              config/err-to-email))
   (ANY fplog-uri-template
        [user-id fplog-id]
-       (fplogres/fplog-res config/db-spec
+       (fplogres/fplog-res (config/pooled-db-spec)
                            config/fp-mt-subtype-prefix
                            config/fphdr-auth-token
                            config/fphdr-error-mask

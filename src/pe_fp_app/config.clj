@@ -1,10 +1,12 @@
 (ns pe-fp-app.config
   (:require [environ.core :refer [env]]
+            [clojure.tools.logging :as log]
             [ring.util.codec :refer [url-encode]]
             [clojure.java.jdbc :as j]
             [pe-user-core.core :as usercore]
             [pe-user-rest.meta :as usermeta]
-            [clojurewerkz.mailer.core :refer [delivery-mode!]]))
+            [clojurewerkz.mailer.core :refer [delivery-mode!]])
+  (:import com.mchange.v2.c3p0.ComboPooledDataSource))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; URI prefix
@@ -177,5 +179,34 @@
            (.addDataType jdbc-conn "geometry" org.postgis.PGgeometry))))
      db-spec)))
 
-(def db-spec-without-db (db-spec-fn nil))
-(def db-spec (db-spec-fn fp-db-name))
+(defn db-spec-without-db
+  []
+  (with-meta
+    (db-spec-fn nil)
+    {:subprotocol fp-jdbc-subprotocol}))
+
+(defn db-spec
+  []
+  (with-meta
+    (db-spec-fn fp-db-name)
+    {:subprotocol fp-jdbc-subprotocol}))
+
+(def ^:dynamic *use-unpooled-db* false)
+
+(defn pooled-db-spec
+  []
+  (with-meta
+    (let [db-spec (db-spec-fn fp-db-name)]
+      (if *use-unpooled-db*
+        db-spec
+        (let [cpds (doto (ComboPooledDataSource.)
+                     (.setDriverClass (:classname db-spec))
+                     (.setJdbcUrl (str "jdbc:" (:subprotocol db-spec) ":" (:subname db-spec)))
+                     (.setUser (:user db-spec))
+                     (.setPassword (:password db-spec))
+                     ;; expire excess connections after 30 minutes of inactivity:
+                     #_(.setMaxIdleTimeExcessConnections (* 30 60))
+                     ;; expire connections after 3 hours of inactivity:
+                     #_(.setMaxIdleTime (* 3 60 60)))]
+          {:datasource cpds})))
+    {:subprotocol fp-jdbc-subprotocol}))

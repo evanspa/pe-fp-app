@@ -33,7 +33,7 @@
   (println "Proceeding to refresh the database")
   ;(jcore/drop-database config/db-spec-without-db config/fp-db-name)
   ;(jcore/create-database config/db-spec-without-db config/fp-db-name)
-  (j/db-do-commands config/db-spec
+  (j/db-do-commands (config/db-spec)
                     true
                     fpddl/v6-create-postgis-extension)
   (lifecycle/init-database)
