@@ -33,9 +33,12 @@
   (println "Proceeding to refresh the database")
   ;(jcore/drop-database config/db-spec-without-db config/fp-db-name)
   ;(jcore/create-database config/db-spec-without-db config/fp-db-name)
-  (j/db-do-commands (config/db-spec)
-                    true
-                    fpddl/v6-create-postgis-extension)
+  (try
+    (j/db-do-commands (config/db-spec)
+                      true
+                      fpddl/v6-create-postgis-extension)
+    (catch Exception e
+      (log/debug "Exception caught executing 'fpddl/v6-create-postgis-extension'.  This is okay.")))
   (lifecycle/init-database)
   (reset! server (create-and-start-server))
   (println "Jetty server restarted."))
