@@ -191,6 +191,11 @@
     (db-spec-fn fp-db-name)
     {:subprotocol fp-jdbc-subprotocol}))
 
+; Used for unit testing purposes.  I.e., with pooling enabled, the unit tests'
+; 'drop database' step fails because Postgres complains that there are existing
+; connections out there that are 'connected' to the database, which is the case
+; when pooling is enabled.  So, this dynamic var will be set to true in the
+; core_tests module.
 (def ^:dynamic *use-unpooled-db* false)
 
 (defn pooled-db-spec
