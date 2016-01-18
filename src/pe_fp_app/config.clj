@@ -179,42 +179,27 @@
            (.addDataType jdbc-conn "geometry" org.postgis.PGgeometry))))
      db-spec)))
 
-(defn db-spec-without-db
-  []
+(def db-spec-without-db
   (with-meta
     (db-spec-fn nil)
     {:subprotocol fp-jdbc-subprotocol}))
 
-(defn db-spec
-  []
+(def db-spec
   (with-meta
     (db-spec-fn fp-db-name)
     {:subprotocol fp-jdbc-subprotocol}))
 
-; Used for unit testing purposes.  I.e., with pooling enabled, the unit tests'
-; 'drop database' step fails because Postgres complains that there are existing
-; connections out there that are 'connected' to the database, which is the case
-; when pooling is enabled.  So, this dynamic var will be set to true in the
-; core_tests module.
-;(def ^:dynamic *use-unpooled-db* false)
-
-; until I can figure out how to return connections to the pool!
-(def ^:dynamic *use-unpooled-db* true)
-
-(defn pooled-db-spec
-  []
+(def ^:dynamic pooled-db-spec
   (with-meta
-    (let [db-spec (db-spec-fn fp-db-name)]
-      (if *use-unpooled-db*
-        db-spec
-        (let [cpds (doto (ComboPooledDataSource.)
-                     (.setDriverClass (:classname db-spec))
-                     (.setJdbcUrl (str "jdbc:" (:subprotocol db-spec) ":" (:subname db-spec)))
-                     (.setUser (:user db-spec))
-                     (.setPassword (:password db-spec))
-                     ;; expire excess connections after 30 minutes of inactivity:
-                     #_(.setMaxIdleTimeExcessConnections (* 30 60))
-                     ;; expire connections after 3 hours of inactivity:
-                     #_(.setMaxIdleTime (* 3 60 60)))]
-          {:datasource cpds})))
+    (let [db-spec (db-spec-fn fp-db-name)
+          cpds (doto (ComboPooledDataSource.)
+                 (.setDriverClass (:classname db-spec))
+                 (.setJdbcUrl (str "jdbc:" (:subprotocol db-spec) ":" (:subname db-spec)))
+                 (.setUser (:user db-spec))
+                 (.setPassword (:password db-spec))
+                 ;; expire excess connections after 30 minutes of inactivity:
+                 #_(.setMaxIdleTimeExcessConnections (* 30 60))
+                 ;; expire connections after 3 hours of inactivity:
+                 #_(.setMaxIdleTime (* 3 60 60)))]
+      {:datasource cpds})
     {:subprotocol fp-jdbc-subprotocol}))
