@@ -196,7 +196,10 @@
 ; connections out there that are 'connected' to the database, which is the case
 ; when pooling is enabled.  So, this dynamic var will be set to true in the
 ; core_tests module.
-(def ^:dynamic *use-unpooled-db* false)
+;(def ^:dynamic *use-unpooled-db* false)
+
+; until I can figure out how to return connections to the pool!
+(def ^:dynamic *use-unpooled-db* true)
 
 (defn pooled-db-spec
   []

@@ -122,6 +122,7 @@
 
 (defn init-database
   []
+
   ;; Database setup
   (log/info (format "Proceeding to setup database (app version=[%s])" config/fp-app-version))
 
