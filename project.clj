@@ -29,8 +29,8 @@
                  [pe-rest-utils "0.0.37"]
                  [pe-user-core "0.1.39"]
                  [pe-user-rest "0.0.54"]
-                 [pe-fp-core "0.0.44"]
-                 [pe-fp-rest "0.0.38"]]
+                 [pe-fp-core "0.0.46"]
+                 [pe-fp-rest "0.0.39"]]
   :resource-paths ["resources"]
   :ring {:handler pe-fp-app.core/fp-app
          :init pe-fp-app.lifecycle/init
