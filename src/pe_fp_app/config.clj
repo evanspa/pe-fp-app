@@ -24,16 +24,23 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def fp-mt-subtype-prefix "vnd.fp.")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Header names
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(def fphdr-establish-session "fp-establish-session")
-(def fphdr-auth-token "fp-auth-token")
-(def fphdr-error-mask "fp-error-mask")
-(def fphdr-if-unmodified-since "fp-if-unmodified-since")
-(def fphdr-if-modified-since "fp-if-modified-since")
-(def fphdr-login-failed-reason "fp-login-failed-reason")
-(def fphdr-delete-reason "fp-delete-reason")
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def fphdr-establish-session       "fp-establish-session")
+(def fphdr-auth-token              "fp-auth-token")
+(def fphdr-error-mask              "fp-error-mask")
+(def fphdr-if-unmodified-since     "fp-if-unmodified-since")
+(def fphdr-if-modified-since       "fp-if-modified-since")
+(def fphdr-login-failed-reason     "fp-login-failed-reason")
+(def fphdr-delete-reason           "fp-delete-reason")
+(def fphdr-desired-embedded-format "fp-desired-embedded-format")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Types of 'embedded' resource structerings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def id-keyed-embedded-format "id-keyed")
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; REPL port number

@@ -349,33 +349,113 @@
                                           vehicle
                                           version
                                           accept-format-ind))
-                      vehicles)
-                 (map (fn [[fuelstation-id fuelstation]]
-                        (embedded-fuelstation user-id
-                                              fuelstation-id
-                                              db-spec
-                                              fuelstation
-                                              version
-                                              accept-format-ind))
-                      fuelstations)
-                 (map (fn [[fplog-id fplog]]
-                        (embedded-fplog user-id
-                                        fplog-id
-                                        db-spec
-                                        fplog
-                                        version
-                                        accept-format-ind))
-                      fplogs)
-                 (map (fn [[envlog-id envlog]]
-                        (embedded-envlog user-id
-                                         envlog-id
-                                         db-spec
-                                         envlog
-                                         version
-                                         accept-format-ind))
-                      envlogs))))
+                    vehicles)
+               (map (fn [[fuelstation-id fuelstation]]
+                      (embedded-fuelstation user-id
+                                            fuelstation-id
+                                            db-spec
+                                            fuelstation
+                                            version
+                                            accept-format-ind))
+                    fuelstations)
+               (map (fn [[fplog-id fplog]]
+                      (embedded-fplog user-id
+                                      fplog-id
+                                      db-spec
+                                      fplog
+                                      version
+                                      accept-format-ind))
+                    fplogs)
+               (map (fn [[envlog-id envlog]]
+                      (embedded-envlog user-id
+                                       envlog-id
+                                       db-spec
+                                       envlog
+                                       version
+                                      accept-format-ind))
+                    envlogs))))
 
-(defn user-embedded-fn
+(defn fp-entities->map
+  [version
+   db-spec
+   accept-format-ind
+   user-id
+   vehicles
+   fuelstations
+   fplogs
+   envlogs]
+  (letfn [(enumerate-vehicles []
+            (reduce (fn [added-vehicles [veh-id vehicle :as v]]
+                      (merge added-vehicles
+                             {veh-id (embedded-vehicle user-id
+                                                       veh-id
+                                                       db-spec
+                                                       vehicle
+                                                       version
+                                                       accept-format-ind)}))
+                    {}
+                    vehicles))
+          (enumerate-fuelstations []
+            (reduce (fn [added-fuelstations [fuelstation-id fuelstation]]
+                      (merge added-fuelstations
+                             {fuelstation-id (embedded-fuelstation user-id
+                                                                   fuelstation-id
+                                                                   db-spec
+                                                                   fuelstation
+                                                                   version
+                                                                   accept-format-ind)}))
+                    {}
+                    fuelstations))
+          (enumerate-fplogs []
+            (reduce (fn [added-fplogs [fplog-id fplog]]
+                      (merge added-fplogs
+                             {fplog-id (embedded-fplog user-id
+                                                       fplog-id
+                                                       db-spec
+                                                       fplog
+                                                       version
+                                                       accept-format-ind)}))
+                    {}
+                    fplogs))
+          (enumerate-envlogs []
+            (reduce (fn [added-envlogs [envlog-id envlog]]
+                      (merge added-envlogs
+                             {envlog-id (embedded-envlog user-id
+                                                         envlog-id
+                                                         db-spec
+                                                         envlog
+                                                         version
+                                                         accept-format-ind)}))
+                    {}
+                    envlogs))]
+    {:vehicles     (enumerate-vehicles)
+     :fuelstations (enumerate-fuelstations)
+     :fplogs       (enumerate-fplogs)
+     :envlogs      (enumerate-envlogs)}))
+
+(defn- user-embedded-coll-fn
+  [version
+   base-url
+   entity-uri-prefix
+   entity-uri
+   db-spec
+   accept-format-ind
+   user-id
+   fp-entities->coll]
+  (let [vehicles (fpcore/vehicles-for-user db-spec user-id)
+        fuelstations (fpcore/fuelstations-for-user db-spec user-id)
+        fplogs (fpcore/fplogs-for-user db-spec user-id)
+        envlogs (fpcore/envlogs-for-user db-spec user-id)]
+    (fp-entities->coll version
+                       db-spec
+                       accept-format-ind
+                       user-id
+                       vehicles
+                       fuelstations
+                       fplogs
+                       envlogs)))
+
+(defn- user-embedded-vec-fn
   [version
    base-url
    entity-uri-prefix
@@ -383,18 +463,53 @@
    db-spec
    accept-format-ind
    user-id]
-  (let [vehicles (fpcore/vehicles-for-user db-spec user-id)
-        fuelstations (fpcore/fuelstations-for-user db-spec user-id)
-        fplogs (fpcore/fplogs-for-user db-spec user-id)
-        envlogs (fpcore/envlogs-for-user db-spec user-id)]
-    (fp-entities->vec version
-                      db-spec
-                      accept-format-ind
-                      user-id
-                      vehicles
-                      fuelstations
-                      fplogs
-                      envlogs)))
+  (user-embedded-coll-fn version
+                         base-url
+                         entity-uri-prefix
+                         entity-uri
+                         db-spec
+                         accept-format-ind
+                         user-id
+                         fp-entities->vec))
+
+(defn- user-embedded-map-fn
+  [version
+   base-url
+   entity-uri-prefix
+   entity-uri
+   db-spec
+   accept-format-ind
+   user-id]
+  (user-embedded-coll-fn version
+                         base-url
+                         entity-uri-prefix
+                         entity-uri
+                         db-spec
+                         accept-format-ind
+                         user-id
+                         fp-entities->map))
+
+(defn- user-embedded-fn-maker
+  [ctx]
+  (fn [version
+       base-url
+       entity-uri-prefix
+       entity-uri
+       db-spec
+       accept-format-ind
+       user-id]
+    (let [desired-embedded-format (get-in ctx [:request :headers config/fphdr-desired-embedded-format])
+          embedded-fn (if (= desired-embedded-format config/id-keyed-embedded-format)
+                        fp-entities->map
+                        fp-entities->vec)]
+      (user-embedded-coll-fn version
+                             base-url
+                             entity-uri-prefix
+                             entity-uri
+                             db-spec
+                             accept-format-ind
+                             user-id
+                             embedded-fn))))
 
 (defn changelog-embedded-fn
   [version
@@ -497,7 +612,7 @@
                            config/fphdr-error-mask
                            config/fp-base-url
                            config/fp-entity-uri-prefix
-                           user-embedded-fn
+                           user-embedded-fn-maker
                            user-links-fn
                            config/fphdr-login-failed-reason
                            config/err-notification-mustache-template

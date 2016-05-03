@@ -7,3 +7,4 @@ target
 pom.xml.asc
 doc
 .nrepl-port
+sh/*.json

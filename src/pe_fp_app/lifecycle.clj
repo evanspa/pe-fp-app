@@ -20,10 +20,10 @@
        ;; User / auth-token setup
        (j/db-do-commands config/db-spec
                          true
-                         uddl/v0-create-user-account-ddl
-                         uddl/v0-add-unique-constraint-user-account-email
-                         uddl/v0-add-unique-constraint-user-account-username
-                         uddl/v0-create-authentication-token-ddl)
+                         [uddl/v0-create-user-account-ddl
+                          uddl/v0-add-unique-constraint-user-account-email
+                          uddl/v0-add-unique-constraint-user-account-username
+                          uddl/v0-create-authentication-token-ddl])
        (jcore/with-try-catch-exec-as-query config/db-spec
          (uddl/v0-create-updated-count-inc-trigger-fn config/db-spec))
        (jcore/with-try-catch-exec-as-query config/db-spec
@@ -31,8 +31,8 @@
        ;; Vehicle setup
        (j/db-do-commands config/db-spec
                          true
-                         fpddl/v0-create-vehicle-ddl
-                         fpddl/v0-add-unique-constraint-vehicle-name)
+                         [fpddl/v0-create-vehicle-ddl
+                          fpddl/v0-add-unique-constraint-vehicle-name])
        (jcore/with-try-catch-exec-as-query config/db-spec
          (fpddl/v0-create-vehicle-updated-count-inc-trigger-fn config/db-spec))
        (jcore/with-try-catch-exec-as-query config/db-spec
@@ -40,8 +40,8 @@
        ;; Fuelstation setup
        (j/db-do-commands config/db-spec
                          true
-                         fpddl/v0-create-fuelstation-ddl
-                         fpddl/v0-create-index-on-fuelstation-name)
+                         [fpddl/v0-create-fuelstation-ddl
+                          fpddl/v0-create-index-on-fuelstation-name])
        (jcore/with-try-catch-exec-as-query config/db-spec
          (fpddl/v0-create-fuelstation-updated-count-inc-trigger-fn config/db-spec))
        (jcore/with-try-catch-exec-as-query config/db-spec
@@ -49,7 +49,7 @@
        ;; Fuel purchase log setup
        (j/db-do-commands config/db-spec
                          true
-                         fpddl/v0-create-fplog-ddl)
+                         [fpddl/v0-create-fplog-ddl])
        (jcore/with-try-catch-exec-as-query config/db-spec
          (fpddl/v0-create-fplog-updated-count-inc-trigger-fn config/db-spec))
        (jcore/with-try-catch-exec-as-query config/db-spec
@@ -57,7 +57,7 @@
        ;; Environment log setup
        (j/db-do-commands config/db-spec
                          true
-                         fpddl/v0-create-envlog-ddl)
+                         [fpddl/v0-create-envlog-ddl])
        (jcore/with-try-catch-exec-as-query config/db-spec
          (fpddl/v0-create-envlog-updated-count-inc-trigger-fn config/db-spec))
        (jcore/with-try-catch-exec-as-query config/db-spec
@@ -65,19 +65,19 @@
    1 (fn []
        (j/db-do-commands config/db-spec
                          true
-                         fpddl/v1-vehicle-add-fuel-capacity-col))
+                         [fpddl/v1-vehicle-add-fuel-capacity-col]))
    2 (fn []
        (j/db-do-commands config/db-spec
                          true
-                         fpddl/v2-vehicle-drop-erroneous-unique-name-constraint
-                         fpddl/v2-vehicle-add-proper-unique-name-constraint))
+                         [fpddl/v2-vehicle-drop-erroneous-unique-name-constraint
+                          fpddl/v2-vehicle-add-proper-unique-name-constraint]))
    3 (fn []
        (j/db-do-commands config/db-spec
                          true
-                         uddl/v1-user-add-deleted-reason-col
-                         uddl/v1-user-add-suspended-at-col
-                         uddl/v1-user-add-suspended-reason-col
-                         uddl/v1-user-add-suspended-count-col)
+                         [uddl/v1-user-add-deleted-reason-col
+                          uddl/v1-user-add-suspended-at-col
+                          uddl/v1-user-add-suspended-reason-col
+                          uddl/v1-user-add-suspended-count-col])
        (jcore/with-try-catch-exec-as-query config/db-spec
          (uddl/v1-create-suspended-count-inc-trigger-fn config/db-spec))
        (jcore/with-try-catch-exec-as-query config/db-spec
@@ -85,37 +85,37 @@
    4 (fn []
        (j/db-do-commands config/db-spec
                          true
-                         fpddl/v3-vehicle-drop-erroneous-unique-name-constraint-again
-                         fpddl/v3-vehicle-add-proper-unique-name-constraint-take-2))
+                         [fpddl/v3-vehicle-drop-erroneous-unique-name-constraint-again
+                          fpddl/v3-vehicle-add-proper-unique-name-constraint-take-2]))
    5 (fn []
        (j/db-do-commands config/db-spec
                          true
-                         uddl/v2-create-email-verification-token-ddl))
+                         [uddl/v2-create-email-verification-token-ddl]))
    6 (fn []
        (j/db-do-commands config/db-spec
                          true
-                         uddl/v3-create-password-reset-token-ddl))
+                         [uddl/v3-create-password-reset-token-ddl]))
    7 (fn []
        (j/db-do-commands config/db-spec
                          true
-                         fpddl/v4-fplog-add-odometer-col)
+                         [fpddl/v4-fplog-add-odometer-col])
        (fpmig/v4-migrations config/db-spec))
    8 (fn []
        (j/db-do-commands config/db-spec
                          true
-                         fpddl/v5-vehicle-add-diesel-col
-                         fpddl/v5-vehicle-add-has-dte-readout-col
-                         fpddl/v5-vehicle-add-has-mpg-readout-col
-                         fpddl/v5-vehicle-add-has-mph-readout-col
-                         fpddl/v5-vehicle-add-has-outside-temp-readout-col
-                         fpddl/v5-vehicle-add-vin-col
-                         fpddl/v5-vehicle-add-plate-col
-                         fpddl/v5-fplog-add-diesel-col))
+                         [fpddl/v5-vehicle-add-diesel-col
+                          fpddl/v5-vehicle-add-has-dte-readout-col
+                          fpddl/v5-vehicle-add-has-mpg-readout-col
+                          fpddl/v5-vehicle-add-has-mph-readout-col
+                          fpddl/v5-vehicle-add-has-outside-temp-readout-col
+                          fpddl/v5-vehicle-add-vin-col
+                          fpddl/v5-vehicle-add-plate-col
+                          fpddl/v5-fplog-add-diesel-col]))
    9 (fn []
        (j/db-do-commands config/db-spec
                          true
-                         fpddl/v6-create-fuelstation-type-ddl
-                         fpddl/v6-fuelstation-add-fstype-col))
+                         [fpddl/v6-create-fuelstation-type-ddl
+                          fpddl/v6-fuelstation-add-fstype-col]))
    10 (fn []
         (fpddl/v6-fuelstation-add-location-col-sql config/db-spec)
         (fpdataloads/v6-data-loads config/db-spec))})
@@ -127,7 +127,7 @@
   (log/info (format "Proceeding to setup database (app version=[%s])" config/fp-app-version))
 
   ;; Create schema version table
-  (j/db-do-commands config/db-spec true uddl/schema-version-ddl)
+  (j/db-do-commands config/db-spec true [uddl/schema-version-ddl])
 
   ;; Apply DDL operations
   (let [current-schema-version (usercore/get-schema-version config/db-spec)]
