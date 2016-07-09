@@ -84,6 +84,8 @@
 (def fp-verification-email-mustache-template             "email/templates/account-verification.html.mustache")
 (def fp-welcome-and-verification-email-subject-line "Welcome to Gas Jot! [please verify your account]")
 (def fp-verification-email-subject-line "Gas Jot [account verification]")
+(def fp-verification-success-uri "/verificationSuccess")
+(def fp-verification-error-uri "/verificationError")
 
 (def err-notification-mustache-template "email/templates/err-notification.html.mustache")
 (def err-subject    (env :fp-err-notification-subject))
@@ -119,8 +121,8 @@
        "/"
        verification-token))
 
-(def fp-verification-success-mustache-template "web/templates/verification-success.html.mustache")
-(def fp-verification-error-mustache-template   "web/templates/verification-error.html.mustache")
+(def fp-verification-success-web-url (str fp-base-url fp-verification-success-uri))
+(def fp-verification-error-web-url (str fp-base-url fp-verification-error-uri))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Password reset related
@@ -140,9 +142,10 @@
        "/"
        password-reset-token))
 
-(defn fp-password-reset-form-action-maker
+(defn fp-password-reset-web-url-maker
   [email password-reset-token]
-  (str fp-entity-uri-prefix
+  (str fp-base-url
+       "/"
        usermeta/pathcomp-users
        "/"
        (url-encode email)
@@ -150,6 +153,9 @@
        usermeta/pathcomp-password-reset
        "/"
        password-reset-token))
+
+(def fp-password-reset-error-web-uri "/passwordResetPrepareError")
+(def fp-password-reset-error-web-url (str fp-base-url fp-password-reset-error-web-uri))
 
 (defn fp-password-reset-flagged-url-maker
   [email password-reset-token]
@@ -162,10 +168,6 @@
        usermeta/pathcomp-password-reset-flagged
        "/"
        password-reset-token))
-
-(def fp-password-reset-form-mustache-template    "web/templates/password-reset-form.html.mustache")
-(def fp-password-reset-success-mustache-template "web/templates/password-reset-success.html.mustache")
-(def fp-password-reset-error-mustache-template   "web/templates/password-reset-error.html.mustache")
 
 (defn db-spec-fn
   ([]

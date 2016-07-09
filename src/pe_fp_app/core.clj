@@ -31,6 +31,7 @@
             [pe-user-rest.resource.version.send-password-reset-email-res-v001]
             [pe-user-rest.resource.prepare-password-reset-res :as preparepwdresetres]
             [pe-user-rest.resource.password-reset-res :as pwdresetres]
+            [pe-user-rest.resource.version.password-reset-res-v001]
             [pe-fp-core.ddl :as fpddl]
             [pe-fp-rest.meta :as fpmeta]
             [pe-fp-rest.resource.vehicle.vehicles-res :as vehsres]
@@ -116,9 +117,8 @@
           usermeta/pathcomp-prepare-password-reset))
 
 (def password-reset-uri-template
-  (format "%s%s/:email/%s/:password-reset-token"
+  (format "%s%s"
           config/fp-entity-uri-prefix
-          usermeta/pathcomp-users
           usermeta/pathcomp-password-reset))
 
 (def user-uri-template
@@ -511,6 +511,23 @@
                              user-id
                              embedded-fn))))
 
+(defn- empty-user-embedded-fn-maker
+  [ctx]
+  (fn [version
+       base-url
+       entity-uri-prefix
+       entity-uri
+       db-spec
+       accept-format-ind
+       user-id]
+    (let [desired-embedded-format (get-in ctx [:request :headers config/fphdr-desired-embedded-format])]
+      (if (= desired-embedded-format config/id-keyed-embedded-format)
+        {:vehicles     {}
+         :fuelstations {}
+         :fplogs       {}
+         :envlogs      {}}
+        []))))
+
 (defn changelog-embedded-fn
   [version
    base-url
@@ -575,7 +592,7 @@
                            config/fp-base-url
                            config/fp-entity-uri-prefix
                            config/fphdr-establish-session
-                           nil
+                           empty-user-embedded-fn-maker
                            user-links-fn
                            config/fp-welcome-and-verification-email-mustache-template
                            config/fp-welcome-and-verification-email-subject-line
@@ -598,8 +615,8 @@
                                                  config/fp-entity-uri-prefix
                                                  email
                                                  verification-token
-                                                 config/fp-verification-success-mustache-template
-                                                 config/fp-verification-error-mustache-template
+                                                 config/fp-verification-success-web-url
+                                                 config/fp-verification-error-web-url
                                                  config/err-notification-mustache-template
                                                  config/err-subject
                                                  config/err-from-email
@@ -691,23 +708,19 @@
                                                       config/fp-entity-uri-prefix
                                                       (url-decode email)
                                                       password-reset-token
-                                                      config/fp-password-reset-form-mustache-template
-                                                      (config/fp-password-reset-form-action-maker email password-reset-token)
-                                                      config/fp-password-reset-error-mustache-template
+                                                      (config/fp-password-reset-web-url-maker email password-reset-token)
+                                                      config/fp-password-reset-error-web-url
                                                       config/err-notification-mustache-template
                                                       config/err-subject
                                                       config/err-from-email
                                                       config/err-to-email))
   (ANY password-reset-uri-template
-       [email
-        password-reset-token]
+       []
        (pwdresetres/password-reset-res config/pooled-db-spec
+                                       config/fp-mt-subtype-prefix
+                                       config/fphdr-error-mask
                                        config/fp-base-url
                                        config/fp-entity-uri-prefix
-                                       (url-decode email)
-                                       password-reset-token
-                                       config/fp-password-reset-success-mustache-template
-                                       config/fp-password-reset-error-mustache-template
                                        config/err-notification-mustache-template
                                        config/err-subject
                                        config/err-from-email

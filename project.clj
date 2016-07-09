@@ -26,11 +26,11 @@
                  [javax.mail/mail "1.4.7"]
                  [pe-core-utils "0.0.14"]
                  [pe-jdbc-utils "0.0.21"]
-                 [pe-rest-utils "0.0.38"]
-                 [pe-user-core "0.1.41"]
-                 [pe-user-rest "0.0.55"]
-                 [pe-fp-core "0.0.46"]
-                 [pe-fp-rest "0.0.41"]]
+                 [pe-rest-utils "0.0.41"]
+                 [pe-user-core "0.1.42"]
+                 [pe-user-rest "0.0.59"]
+                 [pe-fp-core "0.0.47"]
+                 [pe-fp-rest "0.0.43"]]
   :resource-paths ["resources"]
   :ring {:handler pe-fp-app.core/fp-app
          :init pe-fp-app.lifecycle/init
@@ -44,7 +44,7 @@
                          :fp-db-username "postgres"
                          :fp-jdbc-driver-class "org.postgresql.Driver"
                          :fp-jdbc-subprotocol "postgresql"
-                         :fp-base-url "http://localhost"
+                         :fp-base-url "http://www.jotyourself.com"
                          :fp-smtp-host "localhost"
                          :fp-nrepl-server-port 7888
                          :fp-new-user-notification-from-email "alerts@jotyourself.com"

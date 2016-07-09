@@ -13,7 +13,7 @@
 
 (def nrepl-server)
 
-(def target-schema-version 10)
+(def target-schema-version 11)
 
 (def ddl-operations
   {0 (fn []
@@ -118,7 +118,12 @@
                           fpddl/v6-fuelstation-add-fstype-col]))
    10 (fn []
         (fpddl/v6-fuelstation-add-location-col-sql config/db-spec)
-        (fpdataloads/v6-data-loads config/db-spec))})
+        (fpdataloads/v6-data-loads config/db-spec))
+   11 (fn []
+        (j/db-do-commands config/db-spec
+                          true
+                          [uddl/v4-password-reset-token-add-used-at-col]))
+   })
 
 (defn init-database
   []

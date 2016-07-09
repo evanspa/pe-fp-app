@@ -31,8 +31,8 @@
 
 (defn- go-with-db-refresh []
   (println "Proceeding to refresh the database")
-  ;(jcore/drop-database config/db-spec-without-db config/r-db-name)
-  ;(jcore/create-database config/db-spec-without-db config/r-db-name)
+  ;(jcore/drop-database config/db-spec-without-db config/fp-db-name)
+  ;(jcore/create-database config/db-spec-without-db config/fp-db-name)
   (try
     (j/db-do-commands (config/db-spec)
                       true
@@ -67,3 +67,7 @@
 
 (defn stop []
   (.stop @server))
+
+(defn logout
+  [token]
+  (usercore/invalidate-user-token config/db-spec 0 token usercore/invalrsn-logout))
