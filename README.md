@@ -46,8 +46,10 @@ pe-gasjot-app makes use of the [pe-* Clojure library suite](#pe--clojure-library
 
 ### Client Applications
 
-Currently there only exists an iOS client application for the Gas Jot
-system: [GasJot-ios](https://github.com/evanspa/GasJot-ios).
+Currently there exists 2 client applications:
+
++ an iOS app: [GasJot-ios](https://github.com/evanspa/GasJot-ios)
++ a web app: [gasjot-web](https://github.com/evanspa/gasjot-web)
 
 ## Component Layering
 
