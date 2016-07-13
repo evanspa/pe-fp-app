@@ -1,4 +1,4 @@
-(defproject pe-fp-app "0.0.35"
+(defproject pe-fp-app "0.0.36"
   :description "The Gas Jot REST API endpoint."
   :url "https://github.com/evanspa/pe-fp-app"
   :license {:name "MIT"
@@ -36,7 +36,7 @@
          :init pe-fp-app.lifecycle/init
          :destroy pe-fp-app.lifecycle/stop}
   :profiles {:dev {:source-paths ["dev"]  ;ensures 'user.clj' gets auto-loaded
-                   :env {:fp-app-version "0.0.35"
+                   :env {:fp-app-version "0.0.36"
                          :fp-uri-prefix "/gasjot/d/"
                          :fp-db-name "fp"
                          :fp-db-server-host "localhost"
@@ -44,15 +44,15 @@
                          :fp-db-username "postgres"
                          :fp-jdbc-driver-class "org.postgresql.Driver"
                          :fp-jdbc-subprotocol "postgresql"
-                         :fp-base-url "http://www.jotyourself.com"
+                         :fp-base-url "http://www.gasjot.com"
                          :fp-smtp-host "localhost"
                          :fp-nrepl-server-port 7888
-                         :fp-new-user-notification-from-email "alerts@jotyourself.com"
-                         :fp-new-user-notification-to-email "alerts@jotyourself.com"
+                         :fp-new-user-notification-from-email "alerts@gasjot.com"
+                         :fp-new-user-notification-to-email "alerts@gasjot.com"
                          :fp-new-user-notification-subject "New Gas Jot Sign-up!"
                          :fp-err-notification-subject "Gas Jot Error Caught"
-                         :fp-err-notification-from-email "errors@jotyourself.com"
-                         :fp-err-notification-to-email "errors@jotyourself.com"
+                         :fp-err-notification-from-email "errors@gasjot.com"
+                         :fp-err-notification-to-email "errors@gasjot.com"
                          :fp-min-distance-diff-fs 50}
                    :plugins [[cider/cider-nrepl "0.12.0"]
                              [lein-environ "1.0.2"]

@@ -69,7 +69,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def fp-smtp-host (env :fp-smtp-host))
 (alter-var-root (var usercore/*smtp-server-host*) (fn [_] fp-smtp-host))
-(def fp-support-email-address "Gas Jot <support@jotyourself.com>")
+(def fp-support-email-address "Gas Jot <support@gasjot.com>")
 (delivery-mode! :smtp)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
