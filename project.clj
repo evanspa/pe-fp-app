@@ -1,4 +1,4 @@
-(defproject pe-fp-app "0.0.38"
+(defproject pe-fp-app "0.0.39"
   :description "The Gas Jot REST API endpoint."
   :url "https://github.com/evanspa/pe-fp-app"
   :license {:name "MIT"
@@ -28,15 +28,15 @@
                  [pe-jdbc-utils "0.0.21"]
                  [pe-rest-utils "0.0.43"]
                  [pe-user-core "0.1.42"]
-                 [pe-user-rest "0.0.59"]
+                 [pe-user-rest "0.0.60"]
                  [pe-fp-core "0.0.47"]
-                 [pe-fp-rest "0.0.43"]]
+                 [pe-fp-rest "0.0.44"]]
   :resource-paths ["resources"]
   :ring {:handler pe-fp-app.core/fp-app
          :init pe-fp-app.lifecycle/init
          :destroy pe-fp-app.lifecycle/stop}
   :profiles {:dev {:source-paths ["dev"]  ;ensures 'user.clj' gets auto-loaded
-                   :env {:fp-app-version "0.0.38"
+                   :env {:fp-app-version "0.0.39"
                          :fp-uri-prefix "/gasjot/d/"
                          :fp-db-name "fp"
                          :fp-db-server-host "localhost"
