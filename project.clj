@@ -1,4 +1,4 @@
-(defproject pe-fp-app "0.0.39"
+(defproject pe-fp-app "0.0.40"
   :description "The Gas Jot REST API endpoint."
   :url "https://github.com/evanspa/pe-fp-app"
   :license {:name "MIT"
@@ -26,7 +26,7 @@
                  [javax.mail/mail "1.4.7"]
                  [pe-core-utils "0.0.14"]
                  [pe-jdbc-utils "0.0.21"]
-                 [pe-rest-utils "0.0.44"]
+                 [pe-rest-utils "0.0.45"]
                  [pe-user-core "0.1.42"]
                  [pe-user-rest "0.0.60"]
                  [pe-fp-core "0.0.47"]
@@ -36,7 +36,7 @@
          :init pe-fp-app.lifecycle/init
          :destroy pe-fp-app.lifecycle/stop}
   :profiles {:dev {:source-paths ["dev"]  ;ensures 'user.clj' gets auto-loaded
-                   :env {:fp-app-version "0.0.39"
+                   :env {:fp-app-version "0.0.40"
                          :fp-uri-prefix "/gasjot/d/"
                          :fp-db-name "fp"
                          :fp-db-server-host "localhost"
@@ -44,7 +44,7 @@
                          :fp-db-username "postgres"
                          :fp-jdbc-driver-class "org.postgresql.Driver"
                          :fp-jdbc-subprotocol "postgresql"
-                         :fp-base-url "http://www.gasjot.com"
+                         :fp-base-url "http://dev.gasjot.com"
                          :fp-smtp-host "localhost"
                          :fp-nrepl-server-port 7888
                          :fp-new-user-notification-from-email "alerts@gasjot.com"
