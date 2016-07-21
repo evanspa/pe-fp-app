@@ -15,6 +15,7 @@
             [pe-fp-app.config :as config]
             [pe-fp-app.lifecycle :as lifecycle]
             [pe-fp-app.core :as core]
+            [pe-fp-app.endpoint :as endpoint]
             [clojure.tools.logging :as log]
             [environ.core :refer [env]]
             [pe-jdbc-utils.core :as jcore]
@@ -27,7 +28,7 @@
 
 (defn- create-and-start-server
   []
-  (serve core/fp-app {:port 4040 :open-browser? false :auto-reload? true}))
+  (serve endpoint/fp-app {:port 4040 :open-browser? false :auto-reload? true}))
 
 (defn- go-with-db-refresh []
   (println "Proceeding to refresh the database")

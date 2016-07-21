@@ -1,4 +1,4 @@
-(ns pe-fp-app.core-test
+(ns pe-fp-app.endpoint-test
   (:require [clojure.test :refer :all]
             [clojure.data.json :as json]
             [clojure.tools.logging :as log]
@@ -8,6 +8,7 @@
             [pe-fp-core.core :as fpcore]
             [pe-user-core.core :as usercore]
             [pe-jdbc-utils.core :as jcore]
+            [pe-fp-app.endpoint :as endpoint]
             [pe-fp-app.core :as core]
             [pe-fp-app.lifecycle :as lifecycle]
             [pe-fp-app.config :as config]
@@ -78,7 +79,7 @@
                                                           usermeta/v001
                                                           "json"
                                                           "UTF-8")))
-          resp (core/fp-app req)]
+          resp (endpoint/fp-app req)]
       (testing "status code" (is (= 200 (:status resp)))))
 
     ;; Login again (creating a 2nd auth token in the database)
@@ -98,7 +99,7 @@
                                                           usermeta/v001
                                                           "json"
                                                           "UTF-8")))
-          resp (core/fp-app req)]
+          resp (endpoint/fp-app req)]
       (testing "status code" (is (= 200 (:status resp))))
       (let [hdrs (:headers resp)
             resp-body-stream (:body resp)
@@ -131,7 +132,7 @@
                                 (rtucore/header "Authorization" (rtucore/authorization-req-hdr-val config/fp-auth-scheme
                                                                                                    config/fp-auth-scheme-param-name
                                                                                                    auth-token)))
-                        resp (core/fp-app req)]
+                        resp (endpoint/fp-app req)]
                     (testing "status code" (is (= expected-status-code (:status resp))))
                     (testing "headers and body of fetched change log"
                       (when (= expected-status-code 200)
@@ -175,7 +176,7 @@
                         (rtucore/header "Authorization" (rtucore/authorization-req-hdr-val config/fp-auth-scheme
                                                                                            config/fp-auth-scheme-param-name
                                                                                            auth-token)))
-                resp (core/fp-app req)
+                resp (endpoint/fp-app req)
                 t2-after-1st-vehicle-creation (t/now)]
             (testing "status code" (is (= 201 (:status resp))))
             (testing "headers and body of created 300Z vehicle"
@@ -228,7 +229,7 @@
                                     (rtucore/header "Authorization" (rtucore/authorization-req-hdr-val config/fp-auth-scheme
                                                                                                        config/fp-auth-scheme-param-name
                                                                                                        auth-token)))
-                            resp (core/fp-app req)
+                            resp (endpoint/fp-app req)
                             t3-after-2nd-vehicle-creation (t/now)]
                         (testing "status code" (is (= 201 (:status resp))))
                         (testing "headers and body of created mazda vehicle"
@@ -270,7 +271,7 @@
                                         (rtucore/header "Authorization" (rtucore/authorization-req-hdr-val config/fp-auth-scheme
                                                                                                            config/fp-auth-scheme-param-name
                                                                                                            auth-token)))
-                                resp (core/fp-app req)
+                                resp (endpoint/fp-app req)
                                 t4-after-2nd-vehicle-deletion (t/now)]
                             (testing "status code" (is (= 204 (:status resp))))
                             (get-changelog t3-after-2nd-vehicle-creation 200 1)
@@ -292,7 +293,7 @@
                                                             usermeta/v001
                                                             "json"
                                                             "UTF-8")))
-            resp (core/fp-app req)]
+            resp (endpoint/fp-app req)]
         (testing "status code" (is (= 204 (:status resp)))))
       )
     ))
@@ -324,7 +325,7 @@
                                                           usermeta/v001
                                                           "json"
                                                           "UTF-8")))
-          resp (core/fp-app req)]
+          resp (endpoint/fp-app req)]
       (testing "status code" (is (= 200 (:status resp))))
       (let [hdrs (:headers resp)
             resp-body-stream (:body resp)
@@ -366,7 +367,7 @@
                       (rtucore/header "Authorization" (rtucore/authorization-req-hdr-val config/fp-auth-scheme
                                                                                          config/fp-auth-scheme-param-name
                                                                                          auth-token)))
-              resp (core/fp-app req)]
+              resp (endpoint/fp-app req)]
           (testing "status code" (is (= 201 (:status resp))))
           (testing "headers and body of created 300Z vehicle"
             (let [hdrs (:headers resp)
@@ -419,7 +420,7 @@
                                   (rtucore/header "Authorization" (rtucore/authorization-req-hdr-val config/fp-auth-scheme
                                                                                                      config/fp-auth-scheme-param-name
                                                                                                      auth-token)))
-                          resp (core/fp-app req)]
+                          resp (endpoint/fp-app req)]
                       (testing "status code" (is (= 201 (:status resp))))
                       (testing "headers and body of created mazda vehicle"
                         (let [hdrs (:headers resp)
@@ -466,7 +467,7 @@
                                                           usermeta/v001
                                                           "json"
                                                           "UTF-8")))
-          resp (core/fp-app req)]
+          resp (endpoint/fp-app req)]
       (let [hdrs (:headers resp)
             resp-body-stream (:body resp)
             user-location-str (get hdrs "location")
@@ -506,7 +507,7 @@
                       (rtucore/header "Authorization" (rtucore/authorization-req-hdr-val config/fp-auth-scheme
                                                                                          config/fp-auth-scheme-param-name
                                                                                          auth-token)))
-              resp (core/fp-app req)]
+              resp (endpoint/fp-app req)]
           (testing "status code" (is (= 201 (:status resp))))
           (testing "headers and body of created 300Z vehicle"
             (let [hdrs (:headers resp)
@@ -556,7 +557,7 @@
                                   (rtucore/header "Authorization" (rtucore/authorization-req-hdr-val config/fp-auth-scheme
                                                                                                      config/fp-auth-scheme-param-name
                                                                                                      auth-token)))
-                          resp (core/fp-app req)]
+                          resp (endpoint/fp-app req)]
                       (testing "status code" (is (= 201 (:status resp))))
                       (testing "headers and body of created mazda vehicle"
                         (let [hdrs (:headers resp)

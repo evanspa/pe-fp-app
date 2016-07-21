@@ -1,14 +1,10 @@
 (ns pe-fp-app.core
   (:require [clojure.data.json :as json]
-            [liberator.dev :refer [wrap-trace]]
             [clj-time.core :as t]
             [clj-time.coerce :as c]
             [ring.util.codec :refer [url-decode]]
             [clojure.tools.logging :as log]
-            [compojure.core :refer [defroutes ANY]]
-            [ring.middleware.cookies :refer [wrap-cookies]]
-            [ring.middleware.params :refer [wrap-params]]
-            [compojure.handler :as handler]
+            [compojure.core :refer [ANY]]
             [pe-fp-app.config :as config]
             [pe-user-core.ddl :as userddl]
             [pe-user-core.core :as usercore]
@@ -569,266 +565,304 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The routes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defroutes fp-routes
-  (ANY price-stream-uri-template
-       []
-       (pricestreamres/price-stream-res config/pooled-db-spec
+(def fp-route-definitions
+  [
+   (ANY price-stream-uri-template
+        []
+        (pricestreamres/price-stream-res config/pooled-db-spec
+                                         config/fp-mt-subtype-prefix
+                                         config/fphdr-auth-token
+                                         config/fphdr-error-mask
+                                         config/fp-base-url
+                                         config/fp-entity-uri-prefix
+                                         config/err-notification-mustache-template
+                                         config/err-subject
+                                         config/err-from-email
+                                         config/err-to-email
+                                         config/fp-min-distance-diff-fs))
+   (ANY users-uri-template
+        []
+        (usersres/users-res config/pooled-db-spec
+                            config/fp-mt-subtype-prefix
+                            config/fphdr-auth-token
+                            config/fphdr-error-mask
+                            config/fp-base-url
+                            config/fp-entity-uri-prefix
+                            config/fphdr-establish-session
+                            empty-user-embedded-fn-maker
+                            user-links-fn
+                            config/fp-welcome-and-verification-email-mustache-template
+                            config/fp-welcome-and-verification-email-subject-line
+                            config/fp-support-email-address
+                            config/fp-verification-url-maker
+                            config/fp-verification-flagged-url-maker
+                            config/new-user-notification-mustache-template
+                            config/new-user-notification-from-email
+                            config/new-user-notification-to-email
+                            config/new-user-notification-subject
+                            config/err-notification-mustache-template
+                            config/err-subject
+                            config/err-from-email
+                            config/err-to-email))
+   (ANY verification-uri-template
+        [email
+         verification-token]
+        (verificationres/account-verification-res config/pooled-db-spec
+                                                  config/fp-base-url
+                                                  config/fp-entity-uri-prefix
+                                                  email
+                                                  verification-token
+                                                  config/fp-verification-success-web-url
+                                                  config/fp-verification-error-web-url
+                                                  config/err-notification-mustache-template
+                                                  config/err-subject
+                                                  config/err-from-email
+                                                  config/err-to-email))
+   (ANY login-uri-template
+        []
+        (loginres/login-res config/pooled-db-spec
+                            config/fp-mt-subtype-prefix
+                            config/fphdr-auth-token
+                            config/fphdr-error-mask
+                            config/fp-base-url
+                            config/fp-entity-uri-prefix
+                            user-embedded-fn-maker
+                            user-links-fn
+                            config/fphdr-login-failed-reason
+                            config/err-notification-mustache-template
+                            config/err-subject
+                            config/err-from-email
+                            config/err-to-email))
+   (ANY light-login-uri-template
+        []
+        (loginres/light-login-res config/pooled-db-spec
+                                  config/fp-mt-subtype-prefix
+                                  config/fphdr-auth-token
+                                  config/fphdr-error-mask
+                                  config/fp-base-url
+                                  config/fp-entity-uri-prefix
+                                  config/fphdr-login-failed-reason
+                                  config/err-notification-mustache-template
+                                  config/err-subject
+                                  config/err-from-email
+                                  config/err-to-email))
+   (ANY logout-uri-template
+        [user-id]
+        (logoutres/logout-res config/pooled-db-spec
+                              config/fp-mt-subtype-prefix
+                              config/fphdr-auth-token
+                              config/fphdr-error-mask
+                              config/fp-auth-scheme
+                              config/fp-auth-scheme-param-name
+                              config/fp-base-url
+                              config/fp-entity-uri-prefix
+                              (Long. user-id)
+                              config/err-notification-mustache-template
+                              config/err-subject
+                              config/err-from-email
+                              config/err-to-email))
+   (ANY send-verification-email-uri-template
+        [user-id]
+        (sendveriemailres/send-verification-email-res config/pooled-db-spec
+                                                      config/fp-mt-subtype-prefix
+                                                      config/fphdr-auth-token
+                                                      config/fphdr-error-mask
+                                                      config/fp-auth-scheme
+                                                      config/fp-auth-scheme-param-name
+                                                      config/fp-base-url
+                                                      config/fp-entity-uri-prefix
+                                                      (Long. user-id)
+                                                      config/fp-verification-email-mustache-template
+                                                      config/fp-verification-email-subject-line
+                                                      config/fp-support-email-address
+                                                      config/fp-verification-url-maker
+                                                      config/fp-verification-flagged-url-maker
+                                                      config/err-notification-mustache-template
+                                                      config/err-subject
+                                                      config/err-from-email
+                                                      config/err-to-email))
+   (ANY send-password-reset-email-uri-template
+        []
+        (sendpwdresetemailres/send-password-reset-email-res config/pooled-db-spec
+                                                            config/fp-mt-subtype-prefix
+                                                            config/fphdr-error-mask
+                                                            config/fp-base-url
+                                                            config/fp-entity-uri-prefix
+                                                            config/fp-password-reset-email-mustache-template
+                                                            config/fp-password-reset-email-subject-line
+                                                            config/fp-support-email-address
+                                                            config/fp-prepare-password-reset-url-maker
+                                                            config/fp-password-reset-flagged-url-maker
+                                                            config/err-notification-mustache-template
+                                                            config/err-subject
+                                                            config/err-from-email
+                                                            config/err-to-email))
+   (ANY prepare-password-reset-uri-template
+        [email
+         password-reset-token]
+        (preparepwdresetres/prepare-password-reset-res config/pooled-db-spec
+                                                       config/fp-base-url
+                                                       config/fp-entity-uri-prefix
+                                                       (url-decode email)
+                                                       password-reset-token
+                                                       (config/fp-password-reset-web-url-maker email password-reset-token)
+                                                       config/fp-password-reset-error-web-url
+                                                       config/err-notification-mustache-template
+                                                       config/err-subject
+                                                       config/err-from-email
+                                                       config/err-to-email))
+   (ANY password-reset-uri-template
+        []
+        (pwdresetres/password-reset-res config/pooled-db-spec
                                         config/fp-mt-subtype-prefix
-                                        config/fphdr-auth-token
                                         config/fphdr-error-mask
                                         config/fp-base-url
                                         config/fp-entity-uri-prefix
                                         config/err-notification-mustache-template
                                         config/err-subject
                                         config/err-from-email
-                                        config/err-to-email
-                                        config/fp-min-distance-diff-fs))
-  (ANY users-uri-template
-       []
-       (usersres/users-res config/pooled-db-spec
-                           config/fp-mt-subtype-prefix
-                           config/fphdr-auth-token
-                           config/fphdr-error-mask
-                           config/fp-base-url
-                           config/fp-entity-uri-prefix
-                           config/fphdr-establish-session
-                           empty-user-embedded-fn-maker
-                           user-links-fn
-                           config/fp-welcome-and-verification-email-mustache-template
-                           config/fp-welcome-and-verification-email-subject-line
-                           config/fp-support-email-address
-                           config/fp-verification-url-maker
-                           config/fp-verification-flagged-url-maker
-                           config/new-user-notification-mustache-template
-                           config/new-user-notification-from-email
-                           config/new-user-notification-to-email
-                           config/new-user-notification-subject
-                           config/err-notification-mustache-template
-                           config/err-subject
-                           config/err-from-email
-                           config/err-to-email))
-  (ANY verification-uri-template
-       [email
-        verification-token]
-       (verificationres/account-verification-res config/pooled-db-spec
-                                                 config/fp-base-url
-                                                 config/fp-entity-uri-prefix
-                                                 email
-                                                 verification-token
-                                                 config/fp-verification-success-web-url
-                                                 config/fp-verification-error-web-url
-                                                 config/err-notification-mustache-template
-                                                 config/err-subject
-                                                 config/err-from-email
-                                                 config/err-to-email))
-  (ANY login-uri-template
-       []
-       (loginres/login-res config/pooled-db-spec
-                           config/fp-mt-subtype-prefix
-                           config/fphdr-auth-token
-                           config/fphdr-error-mask
-                           config/fp-base-url
-                           config/fp-entity-uri-prefix
-                           user-embedded-fn-maker
-                           user-links-fn
-                           config/fphdr-login-failed-reason
-                           config/err-notification-mustache-template
-                           config/err-subject
-                           config/err-from-email
-                           config/err-to-email))
-  (ANY light-login-uri-template
-       []
-       (loginres/light-login-res config/pooled-db-spec
+                                        config/err-to-email))
+   (ANY user-uri-template
+        [user-id]
+        (userres/user-res config/pooled-db-spec
+                          config/fp-mt-subtype-prefix
+                          config/fphdr-auth-token
+                          config/fphdr-error-mask
+                          config/fp-auth-scheme
+                          config/fp-auth-scheme-param-name
+                          config/fp-base-url
+                          config/fp-entity-uri-prefix
+                          (Long. user-id)
+                          nil ; embedded-resources-fn
+                          user-links-fn
+                          config/fphdr-if-unmodified-since
+                          config/fphdr-if-modified-since
+                          config/fphdr-delete-reason
+                          config/err-notification-mustache-template
+                          config/err-subject
+                          config/err-from-email
+                          config/err-to-email))
+
+   (ANY changelog-uri-template
+        [user-id]
+        (let [user-id-l (Long. user-id)]
+          (letfn [(mt-fn-maker [mt-subtype-fn]
+                    (fn [version accept-format-ind]
+                      (rucore/media-type rumeta/mt-type
+                                         (mt-subtype-fn config/fp-mt-subtype-prefix)
+                                         version
+                                         accept-format-ind)))
+                  (loc-fn-maker [pathcomp]
+                    (fn [id]
+                      (make-user-subentity-url user-id pathcomp id)))]
+            (clres/changelog-res config/pooled-db-spec
                                  config/fp-mt-subtype-prefix
                                  config/fphdr-auth-token
                                  config/fphdr-error-mask
+                                 config/fp-auth-scheme
+                                 config/fp-auth-scheme-param-name
                                  config/fp-base-url
                                  config/fp-entity-uri-prefix
-                                 config/fphdr-login-failed-reason
+                                 user-id-l
+                                 changelog-embedded-fn
+                                 nil ; links-fn
+                                 config/fphdr-if-modified-since
+                                 (fn [ctx] (userresutils/authorized? ctx
+                                                                     config/pooled-db-spec
+                                                                     user-id-l
+                                                                     config/fp-auth-scheme
+                                                                     config/fp-auth-scheme-param-name))
+                                 userresutils/get-plaintext-auth-token
+                                 [[userddl/tbl-user-account "id" "=" user-id-l "updated_at" "deleted_at"]
+                                  [fpddl/tbl-vehicle "user_id" "=" user-id-l "updated_at" "deleted_at"]
+                                  [fpddl/tbl-fuelstation "user_id" "=" user-id-l "updated_at" "deleted_at"]
+                                  [fpddl/tbl-fplog "user_id" "=" user-id-l "updated_at" "deleted_at"]
+                                  [fpddl/tbl-envlog "user_id" "=" user-id-l "updated_at" "deleted_at"]]
+                                 (fn [exc-and-params]
+                                   (usercore/send-email config/err-notification-mustache-template
+                                                        exc-and-params
+                                                        config/err-subject
+                                                        config/err-from-email
+                                                        config/err-to-email))))))
+
+
+   (ANY vehicles-uri-template
+        [user-id]
+        (vehsres/vehicles-res config/pooled-db-spec
+                              config/fp-mt-subtype-prefix
+                              config/fphdr-auth-token
+                              config/fphdr-error-mask
+                              config/fp-auth-scheme
+                              config/fp-auth-scheme-param-name
+                              config/fp-base-url
+                              config/fp-entity-uri-prefix
+                              (Long. user-id)
+                              nil ; embedded-resources-fn
+                              nil ; links-fn
+                              config/err-notification-mustache-template
+                              config/err-subject
+                              config/err-from-email
+                              config/err-to-email))
+   (ANY vehicle-uri-template
+        [user-id vehicle-id]
+        (vehres/vehicle-res config/pooled-db-spec
+                            config/fp-mt-subtype-prefix
+                            config/fphdr-auth-token
+                            config/fphdr-error-mask
+                            config/fp-auth-scheme
+                            config/fp-auth-scheme-param-name
+                            config/fp-base-url
+                            config/fp-entity-uri-prefix
+                            (Long. user-id)
+                            (Long. vehicle-id)
+                            nil ; embedded-resources-fn
+                            nil ; links-fn
+                            config/fphdr-if-unmodified-since
+                            config/fphdr-if-modified-since
+                            config/err-notification-mustache-template
+                            config/err-subject
+                            config/err-from-email
+                            config/err-to-email))
+   (ANY fuelstations-uri-template
+        [user-id]
+        (fssres/fuelstations-res config/pooled-db-spec
+                                 config/fp-mt-subtype-prefix
+                                 config/fphdr-auth-token
+                                 config/fphdr-error-mask
+                                 config/fp-auth-scheme
+                                 config/fp-auth-scheme-param-name
+                                 config/fp-base-url
+                                 config/fp-entity-uri-prefix
+                                 (Long. user-id)
+                                 nil ; embedded-resources-fn
+                                 nil ; links-fn
                                  config/err-notification-mustache-template
                                  config/err-subject
                                  config/err-from-email
                                  config/err-to-email))
-  (ANY logout-uri-template
-       [user-id]
-       (logoutres/logout-res config/pooled-db-spec
-                             config/fp-mt-subtype-prefix
-                             config/fphdr-auth-token
-                             config/fphdr-error-mask
-                             config/fp-auth-scheme
-                             config/fp-auth-scheme-param-name
-                             config/fp-base-url
-                             config/fp-entity-uri-prefix
-                             (Long. user-id)
-                             config/err-notification-mustache-template
-                             config/err-subject
-                             config/err-from-email
-                             config/err-to-email))
-  (ANY send-verification-email-uri-template
-       [user-id]
-       (sendveriemailres/send-verification-email-res config/pooled-db-spec
-                                                     config/fp-mt-subtype-prefix
-                                                     config/fphdr-auth-token
-                                                     config/fphdr-error-mask
-                                                     config/fp-auth-scheme
-                                                     config/fp-auth-scheme-param-name
-                                                     config/fp-base-url
-                                                     config/fp-entity-uri-prefix
-                                                     (Long. user-id)
-                                                     config/fp-verification-email-mustache-template
-                                                     config/fp-verification-email-subject-line
-                                                     config/fp-support-email-address
-                                                     config/fp-verification-url-maker
-                                                     config/fp-verification-flagged-url-maker
-                                                     config/err-notification-mustache-template
-                                                     config/err-subject
-                                                     config/err-from-email
-                                                     config/err-to-email))
-  (ANY send-password-reset-email-uri-template
-       []
-       (sendpwdresetemailres/send-password-reset-email-res config/pooled-db-spec
-                                                           config/fp-mt-subtype-prefix
-                                                           config/fphdr-error-mask
-                                                           config/fp-base-url
-                                                           config/fp-entity-uri-prefix
-                                                           config/fp-password-reset-email-mustache-template
-                                                           config/fp-password-reset-email-subject-line
-                                                           config/fp-support-email-address
-                                                           config/fp-prepare-password-reset-url-maker
-                                                           config/fp-password-reset-flagged-url-maker
-                                                           config/err-notification-mustache-template
-                                                           config/err-subject
-                                                           config/err-from-email
-                                                           config/err-to-email))
-  (ANY prepare-password-reset-uri-template
-       [email
-        password-reset-token]
-       (preparepwdresetres/prepare-password-reset-res config/pooled-db-spec
-                                                      config/fp-base-url
-                                                      config/fp-entity-uri-prefix
-                                                      (url-decode email)
-                                                      password-reset-token
-                                                      (config/fp-password-reset-web-url-maker email password-reset-token)
-                                                      config/fp-password-reset-error-web-url
-                                                      config/err-notification-mustache-template
-                                                      config/err-subject
-                                                      config/err-from-email
-                                                      config/err-to-email))
-  (ANY password-reset-uri-template
-       []
-       (pwdresetres/password-reset-res config/pooled-db-spec
-                                       config/fp-mt-subtype-prefix
-                                       config/fphdr-error-mask
-                                       config/fp-base-url
-                                       config/fp-entity-uri-prefix
-                                       config/err-notification-mustache-template
-                                       config/err-subject
-                                       config/err-from-email
-                                       config/err-to-email))
-  (ANY user-uri-template
-       [user-id]
-       (userres/user-res config/pooled-db-spec
-                         config/fp-mt-subtype-prefix
-                         config/fphdr-auth-token
-                         config/fphdr-error-mask
-                         config/fp-auth-scheme
-                         config/fp-auth-scheme-param-name
-                         config/fp-base-url
-                         config/fp-entity-uri-prefix
-                         (Long. user-id)
-                         nil ; embedded-resources-fn
-                         user-links-fn
-                         config/fphdr-if-unmodified-since
-                         config/fphdr-if-modified-since
-                         config/fphdr-delete-reason
-                         config/err-notification-mustache-template
-                         config/err-subject
-                         config/err-from-email
-                         config/err-to-email))
-
-  (ANY changelog-uri-template
-       [user-id]
-       (let [user-id-l (Long. user-id)]
-         (letfn [(mt-fn-maker [mt-subtype-fn]
-                   (fn [version accept-format-ind]
-                     (rucore/media-type rumeta/mt-type
-                                        (mt-subtype-fn config/fp-mt-subtype-prefix)
-                                        version
-                                        accept-format-ind)))
-                 (loc-fn-maker [pathcomp]
-                   (fn [id]
-                     (make-user-subentity-url user-id pathcomp id)))]
-           (clres/changelog-res config/pooled-db-spec
-                                config/fp-mt-subtype-prefix
-                                config/fphdr-auth-token
-                                config/fphdr-error-mask
-                                config/fp-auth-scheme
-                                config/fp-auth-scheme-param-name
-                                config/fp-base-url
-                                config/fp-entity-uri-prefix
-                                user-id-l
-                                changelog-embedded-fn
-                                nil ; links-fn
-                                config/fphdr-if-modified-since
-                                (fn [ctx] (userresutils/authorized? ctx
-                                                                    config/pooled-db-spec
-                                                                    user-id-l
-                                                                    config/fp-auth-scheme
-                                                                    config/fp-auth-scheme-param-name))
-                                userresutils/get-plaintext-auth-token
-                                [[userddl/tbl-user-account "id" "=" user-id-l "updated_at" "deleted_at"]
-                                 [fpddl/tbl-vehicle "user_id" "=" user-id-l "updated_at" "deleted_at"]
-                                 [fpddl/tbl-fuelstation "user_id" "=" user-id-l "updated_at" "deleted_at"]
-                                 [fpddl/tbl-fplog "user_id" "=" user-id-l "updated_at" "deleted_at"]
-                                 [fpddl/tbl-envlog "user_id" "=" user-id-l "updated_at" "deleted_at"]]
-                                (fn [exc-and-params]
-                                  (usercore/send-email config/err-notification-mustache-template
-                                                       exc-and-params
-                                                       config/err-subject
-                                                       config/err-from-email
-                                                       config/err-to-email))))))
-
-
-  (ANY vehicles-uri-template
-       [user-id]
-       (vehsres/vehicles-res config/pooled-db-spec
-                             config/fp-mt-subtype-prefix
-                             config/fphdr-auth-token
-                             config/fphdr-error-mask
-                             config/fp-auth-scheme
-                             config/fp-auth-scheme-param-name
-                             config/fp-base-url
-                             config/fp-entity-uri-prefix
-                             (Long. user-id)
-                             nil ; embedded-resources-fn
-                             nil ; links-fn
-                             config/err-notification-mustache-template
-                             config/err-subject
-                             config/err-from-email
-                             config/err-to-email))
-  (ANY vehicle-uri-template
-       [user-id vehicle-id]
-       (vehres/vehicle-res config/pooled-db-spec
-                           config/fp-mt-subtype-prefix
-                           config/fphdr-auth-token
-                           config/fphdr-error-mask
-                           config/fp-auth-scheme
-                           config/fp-auth-scheme-param-name
-                           config/fp-base-url
-                           config/fp-entity-uri-prefix
-                           (Long. user-id)
-                           (Long. vehicle-id)
-                           nil ; embedded-resources-fn
-                           nil ; links-fn
-                           config/fphdr-if-unmodified-since
-                           config/fphdr-if-modified-since
-                           config/err-notification-mustache-template
-                           config/err-subject
-                           config/err-from-email
-                           config/err-to-email))
-  (ANY fuelstations-uri-template
-       [user-id]
-       (fssres/fuelstations-res config/pooled-db-spec
+   (ANY fuelstation-uri-template
+        [user-id fuelstation-id]
+        (fsres/fuelstation-res config/pooled-db-spec
+                               config/fp-mt-subtype-prefix
+                               config/fphdr-auth-token
+                               config/fphdr-error-mask
+                               config/fp-auth-scheme
+                               config/fp-auth-scheme-param-name
+                               config/fp-base-url
+                               config/fp-entity-uri-prefix
+                               (Long. user-id)
+                               (Long. fuelstation-id)
+                               nil ; embedded-resources-fn
+                               nil ; links-fn
+                               config/fphdr-if-unmodified-since
+                               config/fphdr-if-modified-since
+                               config/err-notification-mustache-template
+                               config/err-subject
+                               config/err-from-email
+                               config/err-to-email))
+   (ANY envlogs-uri-template
+        [user-id]
+        (envlogsres/envlogs-res config/pooled-db-spec
                                 config/fp-mt-subtype-prefix
                                 config/fphdr-auth-token
                                 config/fphdr-error-mask
@@ -843,9 +877,9 @@
                                 config/err-subject
                                 config/err-from-email
                                 config/err-to-email))
-  (ANY fuelstation-uri-template
-       [user-id fuelstation-id]
-       (fsres/fuelstation-res config/pooled-db-spec
+   (ANY envlog-uri-template
+        [user-id envlog-id]
+        (envlogres/envlog-res config/pooled-db-spec
                               config/fp-mt-subtype-prefix
                               config/fphdr-auth-token
                               config/fphdr-error-mask
@@ -854,7 +888,7 @@
                               config/fp-base-url
                               config/fp-entity-uri-prefix
                               (Long. user-id)
-                              (Long. fuelstation-id)
+                              (Long. envlog-id)
                               nil ; embedded-resources-fn
                               nil ; links-fn
                               config/fphdr-if-unmodified-since
@@ -863,87 +897,40 @@
                               config/err-subject
                               config/err-from-email
                               config/err-to-email))
-  (ANY envlogs-uri-template
-       [user-id]
-       (envlogsres/envlogs-res config/pooled-db-spec
-                               config/fp-mt-subtype-prefix
-                               config/fphdr-auth-token
-                               config/fphdr-error-mask
-                               config/fp-auth-scheme
-                               config/fp-auth-scheme-param-name
-                               config/fp-base-url
-                               config/fp-entity-uri-prefix
-                               (Long. user-id)
-                               nil ; embedded-resources-fn
-                               nil ; links-fn
-                               config/err-notification-mustache-template
-                               config/err-subject
-                               config/err-from-email
-                               config/err-to-email))
-  (ANY envlog-uri-template
-       [user-id envlog-id]
-       (envlogres/envlog-res config/pooled-db-spec
-                             config/fp-mt-subtype-prefix
-                             config/fphdr-auth-token
-                             config/fphdr-error-mask
-                             config/fp-auth-scheme
-                             config/fp-auth-scheme-param-name
-                             config/fp-base-url
-                             config/fp-entity-uri-prefix
-                             (Long. user-id)
-                             (Long. envlog-id)
-                             nil ; embedded-resources-fn
-                             nil ; links-fn
-                             config/fphdr-if-unmodified-since
-                             config/fphdr-if-modified-since
-                             config/err-notification-mustache-template
-                             config/err-subject
-                             config/err-from-email
-                             config/err-to-email))
-  (ANY fplogs-uri-template
-       [user-id]
-       (fplogsres/fplogs-res config/pooled-db-spec
-                             config/fp-mt-subtype-prefix
-                             config/fphdr-auth-token
-                             config/fphdr-error-mask
-                             config/fp-auth-scheme
-                             config/fp-auth-scheme-param-name
-                             config/fp-base-url
-                             config/fp-entity-uri-prefix
-                             (Long. user-id)
-                             nil ; embedded-resources-fn
-                             nil ; links-fn
-                             config/err-notification-mustache-template
-                             config/err-subject
-                             config/err-from-email
-                             config/err-to-email))
-  (ANY fplog-uri-template
-       [user-id fplog-id]
-       (fplogres/fplog-res config/pooled-db-spec
-                           config/fp-mt-subtype-prefix
-                           config/fphdr-auth-token
-                           config/fphdr-error-mask
-                           config/fp-auth-scheme
-                           config/fp-auth-scheme-param-name
-                           config/fp-base-url
-                           config/fp-entity-uri-prefix
-                           (Long. user-id)
-                           (Long. fplog-id)
-                           nil ; embedded-resources-fn
-                           nil ; links-fn
-                           config/fphdr-if-unmodified-since
-                           config/fphdr-if-modified-since
-                           config/err-notification-mustache-template
-                           config/err-subject
-                           config/err-from-email
-                           config/err-to-email)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Middleware-decorated app
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(def fp-app
-  (-> fp-routes
-      (handler/api)
-      ;(wrap-trace :header)
-      (wrap-params)
-      (wrap-cookies)))
+   (ANY fplogs-uri-template
+        [user-id]
+        (fplogsres/fplogs-res config/pooled-db-spec
+                              config/fp-mt-subtype-prefix
+                              config/fphdr-auth-token
+                              config/fphdr-error-mask
+                              config/fp-auth-scheme
+                              config/fp-auth-scheme-param-name
+                              config/fp-base-url
+                              config/fp-entity-uri-prefix
+                              (Long. user-id)
+                              nil ; embedded-resources-fn
+                              nil ; links-fn
+                              config/err-notification-mustache-template
+                              config/err-subject
+                              config/err-from-email
+                              config/err-to-email))
+   (ANY fplog-uri-template
+        [user-id fplog-id]
+        (fplogres/fplog-res config/pooled-db-spec
+                            config/fp-mt-subtype-prefix
+                            config/fphdr-auth-token
+                            config/fphdr-error-mask
+                            config/fp-auth-scheme
+                            config/fp-auth-scheme-param-name
+                            config/fp-base-url
+                            config/fp-entity-uri-prefix
+                            (Long. user-id)
+                            (Long. fplog-id)
+                            nil ; embedded-resources-fn
+                            nil ; links-fn
+                            config/fphdr-if-unmodified-since
+                            config/fphdr-if-modified-since
+                            config/err-notification-mustache-template
+                            config/err-subject
+                            config/err-from-email
+                            config/err-to-email))])
