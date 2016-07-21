@@ -4,7 +4,9 @@
             [clj-time.coerce :as c]
             [ring.util.codec :refer [url-decode]]
             [clojure.tools.logging :as log]
-            [compojure.core :refer [ANY]]
+            [compojure.core :refer [ANY GET]]
+            [liberator.core :refer [resource]]
+            [liberator.representation :refer [ring-response]]
             [pe-fp-app.config :as config]
             [pe-user-core.ddl :as userddl]
             [pe-user-core.core :as usercore]
@@ -63,6 +65,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; URL templates for routing
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def build-version-uri-template
+  (format "%s%s"
+          config/fp-entity-uri-prefix
+          "build-version"))
+
 (def price-stream-uri-template
   (format "%s%s"
           config/fp-entity-uri-prefix
@@ -567,6 +574,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def fp-route-definitions
   [
+   (GET build-version-uri-template
+        []
+        (fn [req] (resource
+                   :available-charsets rumeta/supported-char-sets
+                   :available-languages rumeta/supported-languages
+                   :allowed-methods [:get]
+                   :available-media-types ["text/plain"]
+                   :handle-ok
+                   config/fp-app-version)))
    (ANY price-stream-uri-template
         []
         (pricestreamres/price-stream-res config/pooled-db-spec
