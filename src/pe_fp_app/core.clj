@@ -580,7 +580,7 @@
                    :available-charsets rumeta/supported-char-sets
                    :available-languages rumeta/supported-languages
                    :allowed-methods [:get]
-                   :available-media-types ["text/plain"]
+                   :available-media-types ["text/plain" "text/html"]
                    :handle-ok
                    config/fp-app-version)))
    (ANY price-stream-uri-template
